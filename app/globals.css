@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+:root {
+  /* Vaimo brand colour tokens */
+  --color-grey-900: #1a1a1a;
+  --color-grey-700: #404040;
+  --color-grey-500: #808080;
+  --color-grey-300: #c8c8c8;
+  --color-grey-100: #f2f2f2;
+  --color-yellow:   #f5c400;
+  --color-white:    #ffffff;
+
+  /* Layout */
+  --sidebar-width: 260px;
+  --content-max-width: 800px;
+  --nav-height: 56px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-grey-900);
+  background: var(--color-grey-100);
+}
+
+/* ── Prose (rendered markdown) ───────────────────────────────────────────── */
+.prose {
+  max-width: var(--content-max-width);
+  color: var(--color-grey-900);
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  font-weight: 600;
+  color: var(--color-grey-900);
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+}
+
+.prose h1 { font-size: 1.875rem; }
+.prose h2 { font-size: 1.5rem;   border-bottom: 1px solid var(--color-grey-300); padding-bottom: 0.4rem; }
+.prose h3 { font-size: 1.25rem;  }
+
+.prose p {
+  margin-bottom: 1rem;
+}
+
+.prose a {
+  color: var(--color-grey-900);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.prose a:hover {
+  color: var(--color-grey-700);
+}
+
+.prose code {
+  font-family: ui-monospace, "Cascadia Code", "Fira Mono", monospace;
+  font-size: 0.875em;
+  background: var(--color-grey-100);
+  border: 1px solid var(--color-grey-300);
+  border-radius: 3px;
+  padding: 0.1em 0.35em;
+}
+
+.prose pre {
+  background: var(--color-grey-100);
+  border: 1px solid var(--color-grey-300);
+  border-radius: 6px;
+  padding: 1rem;
+  overflow-x: auto;
+  margin-bottom: 1.25rem;
+}
+
+.prose pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.875rem;
+}
+
+.prose blockquote {
+  border-left: 3px solid var(--color-yellow);
+  margin-left: 0;
+  padding-left: 1rem;
+  color: var(--color-grey-700);
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.prose li {
+  margin-bottom: 0.25rem;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  margin-bottom: 1.25rem;
+}
+
+.prose th {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 2px solid var(--color-grey-300);
+  background: var(--color-grey-100);
+}
+
+.prose td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--color-grey-300);
+}
+
+.prose img {
+  max-width: 100%;
+  border-radius: 4px;
+}
+
+/* ── Comment reference superscripts injected into prose ──────────────────── */
+.prose .comment-ref {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1em;
+  height: 1.1em;
+  background: var(--color-yellow);
+  color: var(--color-grey-900);
+  font-size: 0.65em;
+  font-weight: 700;
+  border-radius: 50%;
+  vertical-align: super;
+  cursor: pointer;
+  text-decoration: none;
+  margin-left: 1px;
+}
+
+/* ── Scrollbar (subtle) ──────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--color-grey-100); }
+::-webkit-scrollbar-thumb { background: var(--color-grey-300); border-radius: 3px; }
