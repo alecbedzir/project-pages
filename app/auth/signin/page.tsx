@@ -55,7 +55,7 @@ function SignInForm() {
       >
         <div style={{ textAlign: "center", marginBottom: "2rem" }}>
           <Image
-            src="/vaimo-logo.svg"
+            src="/vaimo-logo.webp"
             alt="Vaimo"
             width={120}
             height={40}

@@ -5,13 +5,21 @@ import { buildNavTree } from "@/lib/nav";
 import { renderMarkdown } from "@/lib/markdown";
 import TopNav from "@/components/TopNav";
 import Sidebar from "@/components/Sidebar";
+import ConfigError from "@/components/ConfigError";
 import { redirect } from "next/navigation";
 
 export default async function HomePage() {
   const session = await getServerSession(await buildAuthOptions());
   if (!session) redirect("/auth/signin");
 
-  const { entries, config } = await getFilteredTree();
+  const repo = process.env.DOCS_REPO ?? "the configured repository";
+  let filteredTree: Awaited<ReturnType<typeof getFilteredTree>>;
+  try {
+    filteredTree = await getFilteredTree();
+  } catch {
+    return <ConfigError repo={repo} />;
+  }
+  const { entries, config } = filteredTree;
   const nav = buildNavTree(entries);
 
   // Try to render README.md or index.md as the home page

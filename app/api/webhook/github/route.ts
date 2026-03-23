@@ -36,9 +36,11 @@ export async function POST(req: NextRequest) {
   const body = JSON.parse(payload);
   const ref: string = body.ref ?? "";
 
-  // Only react to pushes on the main branch
-  if (!ref.endsWith("/main") && ref !== "main") {
-    return NextResponse.json({ message: "Not main branch, ignored" }, { status: 200 });
+  // Only react to pushes on master or main
+  const isMaster = ref === "master" || ref.endsWith("/master");
+  const isMain = ref === "main" || ref.endsWith("/main");
+  if (!isMaster && !isMain) {
+    return NextResponse.json({ message: "Not master/main branch, ignored" }, { status: 200 });
   }
 
   // Bust local config cache so next request reads fresh config

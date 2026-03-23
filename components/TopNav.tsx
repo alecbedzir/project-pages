@@ -45,7 +45,7 @@ export default function TopNav({ siteTitle, onMenuToggle }: TopNavProps) {
         </svg>
       </button>
 
-      <Image src="/vaimo-logo.svg" alt="Vaimo" width={100} height={32} priority />
+      <Image src="/vaimo-logo.webp" alt="Vaimo" width={120} height={32} priority />
 
       <span
         style={{
