@@ -20,8 +20,6 @@ export default function CommentForm({
   placeholder = "Write a comment…",
 }: CommentFormProps) {
   const [body, setBody] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -39,8 +37,8 @@ export default function CommentForm({
           anchor: anchor ?? null,
           parent_id: parentId ?? null,
           body,
-          author_name: name,
-          author_email: email,
+          author_name: "Vaimo Team",
+          author_email: "team@vaimo.com",
         }),
       });
 
@@ -50,8 +48,6 @@ export default function CommentForm({
       }
 
       setBody("");
-      setName("");
-      setEmail("");
       onSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to post comment");
@@ -71,35 +67,13 @@ export default function CommentForm({
 
   return (
     <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-      <div style={{ display: "flex", gap: "0.5rem" }}>
-        <input
-          type="text"
-          placeholder="Your name"
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          style={{ ...inputStyle, flex: 1 }}
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{ ...inputStyle, flex: 1 }}
-        />
-      </div>
       <textarea
         placeholder={placeholder}
         required
         value={body}
         onChange={(e) => setBody(e.target.value)}
         rows={3}
-        style={{
-          ...inputStyle,
-          resize: "vertical",
-          fontFamily: "inherit",
-        }}
+        style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit" }}
       />
       {error && (
         <p style={{ color: "#c0392b", fontSize: "0.8125rem", margin: 0 }}>{error}</p>

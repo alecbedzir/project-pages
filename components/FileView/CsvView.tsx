@@ -89,7 +89,7 @@ export default function CsvView({ rawCsv }: CsvViewProps) {
           style={{
             width: "100%",
             borderCollapse: "collapse",
-            fontSize: "0.9375rem",
+            fontSize: "0.75rem",
           }}
         >
           <thead>

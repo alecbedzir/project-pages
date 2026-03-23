@@ -114,19 +114,27 @@ export default function CommentPanel({ filePath }: CommentPanelProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   const fetchComments = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(`/api/comments?path=${encodeURIComponent(filePath)}`);
       const data = await res.json();
-      setComments(data);
+      setComments(Array.isArray(data) ? data : []);
     } finally {
       setLoading(false);
     }
   }, [filePath]);
 
   useEffect(() => { fetchComments(); }, [fetchComments]);
+
+  // Refresh when an inline comment is added from MarkdownView
+  useEffect(() => {
+    const handler = () => fetchComments();
+    window.addEventListener("vaimo:commentAdded", handler);
+    return () => window.removeEventListener("vaimo:commentAdded", handler);
+  }, [fetchComments]);
 
   // Build threads: top-level comments + their replies
   const topLevel = comments.filter((c) => !c.parent_id);
@@ -138,17 +146,48 @@ export default function CommentPanel({ filePath }: CommentPanelProps) {
   return (
     <aside
       style={{
-        width: "320px",
+        width: collapsed ? "0px" : "320px",
         flexShrink: 0,
-        borderLeft: "1px solid var(--color-grey-300)",
-        padding: "1.5rem",
-        overflowY: "auto",
+        borderLeft: collapsed ? "none" : "1px solid var(--color-grey-300)",
+        padding: collapsed ? "0" : "1.5rem",
+        overflowY: collapsed ? "hidden" : "auto",
+        overflowX: "hidden",
         maxHeight: "calc(100vh - var(--nav-height))",
         position: "sticky",
         top: "var(--nav-height)",
         background: "var(--color-white)",
+        transition: "width 0.2s ease, padding 0.2s ease",
       }}
     >
+      {/* Round toggle button on the left border, vertically centred */}
+      <button
+        onClick={() => setCollapsed((v) => !v)}
+        title={collapsed ? "Expand comments" : "Collapse comments"}
+        style={{
+          position: "absolute",
+          left: collapsed ? "-16px" : "-16px",
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: "28px",
+          height: "28px",
+          borderRadius: "50%",
+          background: "var(--color-white)",
+          border: "1px solid var(--color-grey-300)",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "10px",
+          color: "var(--color-grey-700)",
+          boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+          zIndex: 10,
+          flexShrink: 0,
+        }}
+      >
+        {collapsed ? "◀" : "▶"}
+      </button>
+
+      {/* Header row */}
       <div
         style={{
           display: "flex",

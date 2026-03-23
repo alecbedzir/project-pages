@@ -1,9 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { NavNode, NavFolder } from "@/lib/nav";
+
+const SIDEBAR_DEFAULT_WIDTH = 260;
+const SIDEBAR_MIN_WIDTH = 140;
+const SIDEBAR_MAX_WIDTH = 600;
 
 interface SidebarProps {
   tree: NavNode[];
@@ -11,7 +15,7 @@ interface SidebarProps {
 }
 
 function FolderNode({ node, depth }: { node: NavFolder; depth: number }) {
-  const [open, setOpen] = useState(depth < 2); // auto-expand first two levels
+  const [open, setOpen] = useState(depth < 2);
 
   return (
     <li>
@@ -27,11 +31,15 @@ function FolderNode({ node, depth }: { node: NavFolder; depth: number }) {
           border: "none",
           cursor: "pointer",
           padding: `0.3rem ${0.75 + depth * 0.75}rem`,
-          fontSize: "0.875rem",
+          fontSize: "0.7rem",
           fontWeight: 600,
           color: "var(--color-grey-700)",
           textTransform: "uppercase",
           letterSpacing: "0.04em",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          minWidth: 0,
         }}
       >
         <svg
@@ -47,7 +55,9 @@ function FolderNode({ node, depth }: { node: NavFolder; depth: number }) {
         >
           <polygon points="2,1 8,5 2,9" />
         </svg>
-        {node.name}
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {node.name}
+        </span>
       </button>
       {open && (
         <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
@@ -62,7 +72,7 @@ function FolderNode({ node, depth }: { node: NavFolder; depth: number }) {
 
 function FileNode({ node, depth }: { node: NavNode & { type: "file" }; depth: number }) {
   const pathname = usePathname();
-  const href = `/view/${node.path}`;
+  const href = `/view/${node.path.split("/").map(encodeURIComponent).join("/")}`;
   const isActive = pathname === href;
 
   return (
@@ -72,12 +82,15 @@ function FileNode({ node, depth }: { node: NavNode & { type: "file" }; depth: nu
         style={{
           display: "block",
           padding: `0.3rem ${0.75 + depth * 0.75}rem`,
-          fontSize: "0.875rem",
+          fontSize: "0.7rem",
           color: isActive ? "var(--color-grey-900)" : "var(--color-grey-700)",
           fontWeight: isActive ? 600 : 400,
           textDecoration: "none",
           borderLeft: isActive ? "3px solid var(--color-yellow)" : "3px solid transparent",
-          background: isActive ? "var(--color-grey-100)" : "transparent",
+          background: isActive ? "var(--color-yellow)" : "transparent",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
         }}
       >
         {node.name}
@@ -92,19 +105,49 @@ function NavItem({ node, depth }: { node: NavNode; depth: number }) {
 }
 
 export default function Sidebar({ tree, isOpen }: SidebarProps) {
+  const [width, setWidth] = useState(SIDEBAR_DEFAULT_WIDTH);
+  const dragging = useRef(false);
+  const startX = useRef(0);
+  const startWidth = useRef(0);
+
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
+    dragging.current = true;
+    startX.current = e.clientX;
+    startWidth.current = width;
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (!dragging.current) return;
+      const delta = e.clientX - startX.current;
+      const next = Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, startWidth.current + delta));
+      setWidth(next);
+    };
+
+    const onMouseUp = () => {
+      dragging.current = false;
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  }, [width]);
+
   return (
     <aside
       style={{
-        width: "var(--sidebar-width)",
+        width,
+        minWidth: width,
+        maxWidth: width,
         minHeight: "calc(100vh - var(--nav-height))",
         background: "var(--color-white)",
         borderRight: "1px solid var(--color-grey-300)",
         overflowY: "auto",
+        overflowX: "hidden",
         flexShrink: 0,
-        // Mobile: overlay
         position: "sticky" as const,
         top: "var(--nav-height)",
         maxHeight: "calc(100vh - var(--nav-height))",
+        boxSizing: "border-box",
       }}
       aria-label="Navigation"
     >
@@ -115,6 +158,20 @@ export default function Sidebar({ tree, isOpen }: SidebarProps) {
           ))}
         </ul>
       </nav>
+
+      {/* Drag handle */}
+      <div
+        onMouseDown={onMouseDown}
+        style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          width: "5px",
+          height: "100%",
+          cursor: "col-resize",
+          zIndex: 10,
+        }}
+      />
     </aside>
   );
 }
