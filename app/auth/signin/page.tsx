@@ -14,6 +14,7 @@ export default function SignInPage() {
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
 
   async function handleSubmit(e: React.FormEvent) {
+
     e.preventDefault();
     setError("");
     setLoading(true);
