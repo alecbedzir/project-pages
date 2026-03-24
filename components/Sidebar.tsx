@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { NavNode, NavFolder } from "@/lib/nav";
@@ -24,7 +24,23 @@ interface SidebarProps {
 }
 
 function FolderNode({ node, depth, activePath }: { node: NavFolder; depth: number; activePath?: string }) {
+  const storageKey = `vaimo:folder:${node.path}`;
   const [open, setOpen] = useState(false);
+
+  // Restore persisted state on mount (client only — localStorage unavailable on server)
+  useEffect(() => {
+    const saved = localStorage.getItem(storageKey);
+    if (saved !== null) setOpen(saved === "true");
+  }, [storageKey]);
+
+  const toggle = useCallback(() => {
+    setOpen((v) => {
+      const next = !v;
+      localStorage.setItem(storageKey, String(next));
+      return next;
+    });
+  }, [storageKey]);
+
   const showGallery = hasImageChildren(node);
   const galleryHref = `/gallery/${node.path.split("/").map(encodeURIComponent).join("/")}`;
 
@@ -32,7 +48,7 @@ function FolderNode({ node, depth, activePath }: { node: NavFolder; depth: numbe
     <li>
       <div style={{ display: "flex", alignItems: "center" }}>
         <button
-          onClick={() => setOpen((v) => !v)}
+          onClick={toggle}
           style={{
             display: "flex",
             alignItems: "center",
