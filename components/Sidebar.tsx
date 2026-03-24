@@ -5,6 +5,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { NavNode, NavFolder } from "@/lib/nav";
 
+const IMAGE_EXTS = new Set(["png", "jpg", "jpeg", "gif", "webp", "svg"]);
+
+function hasImageChildren(node: NavFolder): boolean {
+  return node.children.some(
+    (c) => c.type === "file" && IMAGE_EXTS.has(c.name.split(".").pop()?.toLowerCase() ?? "")
+  );
+}
+
 const SIDEBAR_DEFAULT_WIDTH = 260;
 const SIDEBAR_MIN_WIDTH = 140;
 const SIDEBAR_MAX_WIDTH = 600;
@@ -16,49 +24,72 @@ interface SidebarProps {
 
 function FolderNode({ node, depth }: { node: NavFolder; depth: number }) {
   const [open, setOpen] = useState(depth < 2);
+  const showGallery = hasImageChildren(node);
+  const galleryHref = `/gallery/${node.path.split("/").map(encodeURIComponent).join("/")}`;
 
   return (
     <li>
-      <button
-        onClick={() => setOpen((v) => !v)}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "0.4rem",
-          width: "100%",
-          textAlign: "left",
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          padding: `0.3rem ${0.75 + depth * 0.75}rem`,
-          fontSize: "0.7rem",
-          fontWeight: 600,
-          color: "var(--color-grey-700)",
-          textTransform: "uppercase",
-          letterSpacing: "0.04em",
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          minWidth: 0,
-        }}
-      >
-        <svg
-          width="10"
-          height="10"
-          viewBox="0 0 10 10"
-          fill="currentColor"
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <button
+          onClick={() => setOpen((v) => !v)}
           style={{
-            transform: open ? "rotate(90deg)" : "rotate(0deg)",
-            transition: "transform 0.15s",
-            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            gap: "0.4rem",
+            flex: 1,
+            minWidth: 0,
+            textAlign: "left",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            padding: `0.3rem ${0.75 + depth * 0.75}rem`,
+            fontSize: "0.7rem",
+            fontWeight: 600,
+            color: "var(--color-grey-700)",
+            textTransform: "uppercase",
+            letterSpacing: "0.04em",
+            overflow: "hidden",
           }}
         >
-          <polygon points="2,1 8,5 2,9" />
-        </svg>
-        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {node.name}
-        </span>
-      </button>
+          <svg
+            width="10"
+            height="10"
+            viewBox="0 0 10 10"
+            fill="currentColor"
+            style={{
+              transform: open ? "rotate(90deg)" : "rotate(0deg)",
+              transition: "transform 0.15s",
+              flexShrink: 0,
+            }}
+          >
+            <polygon points="2,1 8,5 2,9" />
+          </svg>
+          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {node.name}
+          </span>
+        </button>
+        {showGallery && (
+          <Link
+            href={galleryHref}
+            title="Show all images in gallery"
+            style={{
+              flexShrink: 0,
+              marginRight: "0.5rem",
+              padding: "0.15rem 0.35rem",
+              fontSize: "0.6rem",
+              fontWeight: 600,
+              color: "var(--color-grey-500)",
+              border: "1px solid var(--color-grey-300)",
+              borderRadius: "3px",
+              textDecoration: "none",
+              letterSpacing: "0.02em",
+              whiteSpace: "nowrap",
+            }}
+          >
+            ⊞
+          </Link>
+        )}
+      </div>
       {open && (
         <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
           {node.children.map((child) => (
