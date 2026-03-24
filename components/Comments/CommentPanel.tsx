@@ -146,26 +146,24 @@ export default function CommentPanel({ filePath }: CommentPanelProps) {
   return (
     <aside
       style={{
-        width: collapsed ? "0px" : "320px",
+        width: collapsed ? "28px" : "320px",
         flexShrink: 0,
-        borderLeft: collapsed ? "none" : "1px solid var(--color-grey-300)",
-        padding: collapsed ? "0" : "1.5rem",
-        overflowY: collapsed ? "hidden" : "auto",
-        overflowX: "hidden",
         maxHeight: "calc(100vh - var(--nav-height))",
         position: "sticky",
         top: "var(--nav-height)",
         background: "var(--color-white)",
-        transition: "width 0.2s ease, padding 0.2s ease",
+        transition: "width 0.2s ease",
+        // No overflow here — the toggle button at left:-14px must never be clipped.
+        // The inner div owns scrolling instead.
       }}
     >
-      {/* Round toggle button on the left border, vertically centred */}
+      {/* Round toggle button — centred on the panel's left border */}
       <button
         onClick={() => setCollapsed((v) => !v)}
         title={collapsed ? "Expand comments" : "Collapse comments"}
         style={{
           position: "absolute",
-          left: collapsed ? "-16px" : "-16px",
+          left: "-14px",
           top: "50%",
           transform: "translateY(-50%)",
           width: "28px",
@@ -187,61 +185,77 @@ export default function CommentPanel({ filePath }: CommentPanelProps) {
         {collapsed ? "◀" : "▶"}
       </button>
 
-      {/* Header row */}
+      {/* Scrollable content wrapper — this is what clips and scrolls */}
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "1.25rem",
+          borderLeft: "1px solid var(--color-grey-300)",
+          overflowY: "auto",
+          overflowX: "hidden",
+          maxHeight: "calc(100vh - var(--nav-height))",
+          padding: collapsed ? 0 : "1.5rem",
+          boxSizing: "border-box",
         }}
       >
-        <h2 style={{ margin: 0, fontSize: "0.9375rem", fontWeight: 700 }}>
-          Comments {!loading && `(${comments.length})`}
-        </h2>
-        <button
-          onClick={() => setShowForm((v) => !v)}
-          style={{
-            padding: "0.35rem 0.75rem",
-            background: "var(--color-yellow)",
-            color: "var(--color-grey-900)",
-            border: "none",
-            borderRadius: "4px",
-            fontSize: "0.8125rem",
-            fontWeight: 600,
-            cursor: "pointer",
-          }}
-        >
-          + Add
-        </button>
+        {!collapsed && (
+          <>
+            {/* Header row */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "1.25rem",
+              }}
+            >
+              <h2 style={{ margin: 0, fontSize: "0.9375rem", fontWeight: 700 }}>
+                Comments {!loading && `(${comments.length})`}
+              </h2>
+              <button
+                onClick={() => setShowForm((v) => !v)}
+                style={{
+                  padding: "0.35rem 0.75rem",
+                  background: "var(--color-yellow)",
+                  color: "var(--color-grey-900)",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontSize: "0.8125rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                + Add
+              </button>
+            </div>
+
+            {showForm && (
+              <div style={{ marginBottom: "1.25rem" }}>
+                <CommentForm
+                  filePath={filePath}
+                  onSuccess={() => { setShowForm(false); fetchComments(); }}
+                  onCancel={() => setShowForm(false)}
+                />
+              </div>
+            )}
+
+            {loading ? (
+              <p style={{ color: "var(--color-grey-500)", fontSize: "0.875rem" }}>Loading…</p>
+            ) : threads.length === 0 ? (
+              <p style={{ color: "var(--color-grey-500)", fontSize: "0.875rem" }}>
+                No comments yet. Be the first to add one.
+              </p>
+            ) : (
+              threads.map((t) => (
+                <ThreadItem
+                  key={t.root.id}
+                  thread={t}
+                  filePath={filePath}
+                  onRefresh={fetchComments}
+                />
+              ))
+            )}
+          </>
+        )}
       </div>
-
-      {showForm && (
-        <div style={{ marginBottom: "1.25rem" }}>
-          <CommentForm
-            filePath={filePath}
-            onSuccess={() => { setShowForm(false); fetchComments(); }}
-            onCancel={() => setShowForm(false)}
-          />
-        </div>
-      )}
-
-      {loading ? (
-        <p style={{ color: "var(--color-grey-500)", fontSize: "0.875rem" }}>Loading…</p>
-      ) : threads.length === 0 ? (
-        <p style={{ color: "var(--color-grey-500)", fontSize: "0.875rem" }}>
-          No comments yet. Be the first to add one.
-        </p>
-      ) : (
-        threads.map((t) => (
-          <ThreadItem
-            key={t.root.id}
-            thread={t}
-            filePath={filePath}
-            onRefresh={fetchComments}
-          />
-        ))
-      )}
     </aside>
   );
 }
