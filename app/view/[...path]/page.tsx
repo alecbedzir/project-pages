@@ -32,9 +32,11 @@ export default async function ViewPage({ params }: Props) {
   let content: React.ReactNode;
   const commentsEnabled = config.comments.enabled;
   let showComments = commentsEnabled;
+  let hasRelativeImages = false;
 
   if (MD_EXTS.has(ext)) {
     const raw = rawBuffer.toString("utf-8");
+    hasRelativeImages = /!\[[^\]]*\]\((?!https?:\/\/)(?!data:)[^\s)]+/.test(raw);
     const html = await renderMarkdown(raw, filePath);
     content = <MarkdownView html={html} filePath={filePath} commentsEnabled={commentsEnabled} />;
   } else if (ext === "csv") {
@@ -109,6 +111,9 @@ export default async function ViewPage({ params }: Props) {
             )}
             <div style={{ display: "flex", gap: "0.5rem" }}>
               <DownloadButton filePath={filePath} />
+              {hasRelativeImages && (
+                <DownloadButton filePath={filePath} withMedia />
+              )}
               {showComments && (
                 <DownloadButton filePath={filePath} withComments label="Download with comments" />
               )}

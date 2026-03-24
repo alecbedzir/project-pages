@@ -3,13 +3,18 @@
 interface DownloadButtonProps {
   filePath: string;
   withComments?: boolean;
+  withMedia?: boolean;
   label?: string;
 }
 
-export default function DownloadButton({ filePath, withComments = false, label }: DownloadButtonProps) {
-  const endpoint = withComments ? "/api/download/with-comments" : "/api/download";
+export default function DownloadButton({ filePath, withComments = false, withMedia = false, label }: DownloadButtonProps) {
+  const endpoint = withComments
+    ? "/api/download/with-comments"
+    : withMedia
+    ? "/api/download/with-media"
+    : "/api/download";
   const href = `${endpoint}?path=${encodeURIComponent(filePath)}`;
-  const defaultLabel = withComments ? "Download with comments" : "Download";
+  const defaultLabel = withComments ? "Download with comments" : withMedia ? "Download with media" : "Download";
 
   return (
     <a
