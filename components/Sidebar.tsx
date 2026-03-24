@@ -13,17 +13,18 @@ function hasImageChildren(node: NavFolder): boolean {
   );
 }
 
-const SIDEBAR_DEFAULT_WIDTH = 260;
+const SIDEBAR_DEFAULT_WIDTH = 338;
 const SIDEBAR_MIN_WIDTH = 140;
-const SIDEBAR_MAX_WIDTH = 600;
+const SIDEBAR_MAX_WIDTH = 800;
 
 interface SidebarProps {
   tree: NavNode[];
   isOpen: boolean;
+  activePath?: string;
 }
 
-function FolderNode({ node, depth }: { node: NavFolder; depth: number }) {
-  const [open, setOpen] = useState(depth < 2);
+function FolderNode({ node, depth, activePath }: { node: NavFolder; depth: number; activePath?: string }) {
+  const [open, setOpen] = useState(false);
   const showGallery = hasImageChildren(node);
   const galleryHref = `/gallery/${node.path.split("/").map(encodeURIComponent).join("/")}`;
 
@@ -93,7 +94,7 @@ function FolderNode({ node, depth }: { node: NavFolder; depth: number }) {
       {open && (
         <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
           {node.children.map((child) => (
-            <NavItem key={child.path} node={child} depth={depth + 1} />
+            <NavItem key={child.path} node={child} depth={depth + 1} activePath={activePath} />
           ))}
         </ul>
       )}
@@ -101,10 +102,10 @@ function FolderNode({ node, depth }: { node: NavFolder; depth: number }) {
   );
 }
 
-function FileNode({ node, depth }: { node: NavNode & { type: "file" }; depth: number }) {
+function FileNode({ node, depth, activePath }: { node: NavNode & { type: "file" }; depth: number; activePath?: string }) {
   const pathname = usePathname();
   const href = `/view/${node.path.split("/").map(encodeURIComponent).join("/")}`;
-  const isActive = pathname === href;
+  const isActive = pathname === href || node.path === activePath;
 
   return (
     <li>
@@ -130,12 +131,12 @@ function FileNode({ node, depth }: { node: NavNode & { type: "file" }; depth: nu
   );
 }
 
-function NavItem({ node, depth }: { node: NavNode; depth: number }) {
-  if (node.type === "folder") return <FolderNode node={node} depth={depth} />;
-  return <FileNode node={node} depth={depth} />;
+function NavItem({ node, depth, activePath }: { node: NavNode; depth: number; activePath?: string }) {
+  if (node.type === "folder") return <FolderNode node={node} depth={depth} activePath={activePath} />;
+  return <FileNode node={node} depth={depth} activePath={activePath} />;
 }
 
-export default function Sidebar({ tree, isOpen }: SidebarProps) {
+export default function Sidebar({ tree, isOpen, activePath }: SidebarProps) {
   const [width, setWidth] = useState(SIDEBAR_DEFAULT_WIDTH);
   const dragging = useRef(false);
   const startX = useRef(0);
@@ -185,7 +186,7 @@ export default function Sidebar({ tree, isOpen }: SidebarProps) {
       <nav style={{ paddingTop: "1rem", paddingBottom: "2rem" }}>
         <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
           {tree.map((node) => (
-            <NavItem key={node.path} node={node} depth={0} />
+            <NavItem key={node.path} node={node} depth={0} activePath={activePath} />
           ))}
         </ul>
       </nav>

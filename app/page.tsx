@@ -47,7 +47,7 @@ export default async function HomePage() {
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <TopNav siteTitle={config.site.title} />
       <div style={{ display: "flex", flex: 1 }}>
-        <Sidebar tree={nav} isOpen={true} />
+        <Sidebar tree={nav} isOpen={true} activePath={readmeEntry?.path} />
 
         <main
           style={{
