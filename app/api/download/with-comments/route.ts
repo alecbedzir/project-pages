@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { buildAuthOptions } from "@/lib/auth";
-import { getFilteredTree, getRawFileBuffer } from "@/lib/github";
+import { getConfig, getFilteredTree, getRawFileBuffer } from "@/lib/github";
 import { getComments } from "@/lib/supabase";
 import { buildAnnotatedMarkdown } from "@/lib/markdown";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(await buildAuthOptions());
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const config = await getConfig();
+  if (!config.comments.enabled) return NextResponse.json({ error: "Comments are disabled" }, { status: 403 });
 
   const filePath = req.nextUrl.searchParams.get("path");
   if (!filePath) return NextResponse.json({ error: "path is required" }, { status: 400 });

@@ -43,14 +43,14 @@ export function buildNavTree(entries: TreeEntry[]): NavNode[] {
     }
   }
 
-  // Sort: folders first, then files, both alphabetically
+  // Sort: files first, then folders, both alphabetically
   return sortNodes(root.children);
 }
 
 function sortNodes(nodes: NavNode[]): NavNode[] {
   return nodes
     .sort((a, b) => {
-      if (a.type !== b.type) return a.type === "folder" ? -1 : 1;
+      if (a.type !== b.type) return a.type === "file" ? -1 : 1;
       return a.name.localeCompare(b.name);
     })
     .map((n) =>

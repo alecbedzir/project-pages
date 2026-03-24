@@ -46,18 +46,19 @@ export default async function ViewPage({ params }: Props) {
   const rawBuffer = Buffer.from(file.content, "base64");
 
   let content: React.ReactNode;
-  let showComments = true;
+  const commentsEnabled = config.comments.enabled;
+  let showComments = commentsEnabled;
 
   if (MD_EXTS.has(ext)) {
     const raw = rawBuffer.toString("utf-8");
     const html = await renderMarkdown(raw, filePath);
-    content = <MarkdownView html={html} filePath={filePath} />;
+    content = <MarkdownView html={html} filePath={filePath} commentsEnabled={commentsEnabled} />;
   } else if (ext === "csv") {
     const raw = rawBuffer.toString("utf-8");
     content = <CsvView rawCsv={raw} />;
   } else if (DOCX_EXTS.has(ext)) {
     const html = await convertDocxToHtml(rawBuffer);
-    content = <MarkdownView html={html} filePath={filePath} />;
+    content = <MarkdownView html={html} filePath={filePath} commentsEnabled={commentsEnabled} />;
   } else if (IMAGE_EXTS.has(ext)) {
     content = (
       <ImageView

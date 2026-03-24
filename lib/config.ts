@@ -13,6 +13,9 @@ export interface VaimoConfig {
   auth?: {
     sessionDurationDays?: number;
   };
+  comments?: {
+    enabled?: boolean;
+  };
   include: string[];
   exclude?: string[];
 }
@@ -21,6 +24,7 @@ export interface ParsedConfig {
   site: { title: string; description: string };
   source: { repo: string; branch: string };
   auth: { sessionDurationDays: number };
+  comments: { enabled: boolean };
   include: string[];
   exclude: string[];
 }
@@ -46,6 +50,9 @@ export function parseConfig(raw: string): ParsedConfig {
     },
     auth: {
       sessionDurationDays: parsed.auth?.sessionDurationDays ?? DEFAULT_SESSION_DAYS,
+    },
+    comments: {
+      enabled: parsed.comments?.enabled !== false, // default true
     },
     include: parsed.include,
     exclude: parsed.exclude ?? [],
