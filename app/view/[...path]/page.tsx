@@ -1,18 +1,12 @@
-import { getServerSession } from "next-auth";
-import { redirect, notFound } from "next/navigation";
-import { buildAuthOptions } from "@/lib/auth";
+import { notFound } from "next/navigation";
 import { getFilteredTree, getFileContent } from "@/lib/github";
-import { buildNavTree } from "@/lib/nav";
 import { renderMarkdown } from "@/lib/markdown";
 import { convertDocxToHtml } from "@/lib/docx";
-import TopNav from "@/components/TopNav";
-import Sidebar from "@/components/Sidebar";
 import MarkdownView from "@/components/FileView/MarkdownView";
 import CsvView from "@/components/FileView/CsvView";
 import ImageView from "@/components/FileView/ImageView";
 import DownloadButton from "@/components/DownloadButton";
 import CommentPanel from "@/components/Comments/CommentPanel";
-import ConfigError from "@/components/ConfigError";
 
 type Props = { params: Promise<{ path: string[] }> };
 
@@ -21,21 +15,11 @@ const MD_EXTS = new Set(["md", "mdx"]);
 const DOCX_EXTS = new Set(["docx", "docm"]);
 
 export default async function ViewPage({ params }: Props) {
-  const session = await getServerSession(await buildAuthOptions());
-  if (!session) redirect("/auth/signin");
-
   const { path: segments } = await params;
   const filePath = segments.map(decodeURIComponent).join("/");
 
-  const repo = process.env.DOCS_REPO ?? "the configured repository";
-  let filteredTree: Awaited<ReturnType<typeof getFilteredTree>>;
-  try {
-    filteredTree = await getFilteredTree();
-  } catch {
-    return <ConfigError repo={repo} />;
-  }
-  const { entries, config } = filteredTree;
-  const nav = buildNavTree(entries);
+  // getFilteredTree is wrapped with React cache() — no extra network call vs layout
+  const { entries, config } = await getFilteredTree();
 
   const entry = entries.find((e) => e.path === filePath);
   if (!entry) notFound();
@@ -67,7 +51,6 @@ export default async function ViewPage({ params }: Props) {
       />
     );
   } else {
-    // Generic file: metadata + download only
     showComments = false;
     content = (
       <div
@@ -99,54 +82,44 @@ export default async function ViewPage({ params }: Props) {
   const breadcrumbs = filePath.split("/");
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-      <TopNav siteTitle={config.site.title} />
-      <div style={{ display: "flex", flex: 1 }}>
-        <Sidebar tree={nav} isOpen={true} />
+    <>
+      <main style={{ flex: 1, padding: "1.5rem 2rem", overflowY: "auto", minWidth: 0 }}>
+        {/* Breadcrumb */}
+        <nav aria-label="Breadcrumb" style={{ marginBottom: "1.25rem", fontSize: "0.875rem", color: "var(--color-grey-500)" }}>
+          <span style={{ color: "var(--color-grey-700)" }}>Home</span>
+          {breadcrumbs.map((part, i) => {
+            const isLast = i === breadcrumbs.length - 1;
+            return (
+              <span key={i}>
+                <span style={{ margin: "0 0.35rem" }}>/</span>
+                <span style={{ color: isLast ? "var(--color-grey-900)" : "var(--color-grey-700)", fontWeight: isLast ? 500 : 400 }}>{part}</span>
+              </span>
+            );
+          })}
+        </nav>
 
-        <main style={{ flex: 1, padding: "1.5rem 2rem", overflowY: "auto", minWidth: 0 }}>
-          {/* Breadcrumb */}
-          <nav aria-label="Breadcrumb" style={{ marginBottom: "1.25rem", fontSize: "0.875rem", color: "var(--color-grey-500)" }}>
-            <a href="/" style={{ color: "var(--color-grey-700)", textDecoration: "none" }}>Home</a>
-            {breadcrumbs.map((part, i) => {
-              const href = "/view/" + breadcrumbs.slice(0, i + 1).join("/");
-              const isLast = i === breadcrumbs.length - 1;
-              return (
-                <span key={i}>
-                  <span style={{ margin: "0 0.35rem" }}>/</span>
-                  {isLast ? (
-                    <span style={{ color: "var(--color-grey-900)", fontWeight: 500 }}>{part}</span>
-                  ) : (
-                    <a href={href} style={{ color: "var(--color-grey-700)", textDecoration: "none" }}>{part}</a>
-                  )}
-                </span>
-              );
-            })}
-          </nav>
-
-          {/* File metadata bar */}
-          <div style={{ marginBottom: "1.5rem" }}>
-            <h1 style={{ margin: "0 0 0.5rem", fontSize: "1.25rem", fontWeight: 700 }}>{fileName}</h1>
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
-              {file.lastCommit && (
-                <span style={{ fontSize: "0.8125rem", color: "var(--color-grey-500)" }}>
-                  Updated {new Date(file.lastCommit.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })} · {file.lastCommit.author}
-                </span>
+        {/* File metadata bar */}
+        <div style={{ marginBottom: "1.5rem" }}>
+          <h1 style={{ margin: "0 0 0.5rem", fontSize: "1.25rem", fontWeight: 700 }}>{fileName}</h1>
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+            {file.lastCommit && (
+              <span style={{ fontSize: "0.8125rem", color: "var(--color-grey-500)" }}>
+                Updated {new Date(file.lastCommit.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })} · {file.lastCommit.author}
+              </span>
+            )}
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              <DownloadButton filePath={filePath} />
+              {showComments && (
+                <DownloadButton filePath={filePath} withComments label="Download with comments" />
               )}
-              <div style={{ display: "flex", gap: "0.5rem" }}>
-                <DownloadButton filePath={filePath} />
-                {showComments && (
-                  <DownloadButton filePath={filePath} withComments label="Download with comments" />
-                )}
-              </div>
             </div>
           </div>
+        </div>
 
-          {content}
-        </main>
+        {content}
+      </main>
 
-        {showComments && <CommentPanel filePath={filePath} />}
-      </div>
-    </div>
+      {showComments && <CommentPanel filePath={filePath} />}
+    </>
   );
 }

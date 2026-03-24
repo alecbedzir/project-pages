@@ -1,4 +1,5 @@
 import { Octokit } from "@octokit/rest";
+import { cache } from "react";
 import { parseConfig, filterPaths, type ParsedConfig } from "./config";
 
 let _octokit: Octokit | null = null;
@@ -64,7 +65,7 @@ export interface TreeEntry {
   sha: string;
 }
 
-export async function getFilteredTree(): Promise<{ entries: TreeEntry[]; config: ParsedConfig }> {
+export const getFilteredTree = cache(async (): Promise<{ entries: TreeEntry[]; config: ParsedConfig }> => {
   const config = await getConfig();
   const { owner, repo } = splitRepo(config.source.repo);
   const branch = config.source.branch;
@@ -87,7 +88,7 @@ export async function getFilteredTree(): Promise<{ entries: TreeEntry[]; config:
   );
 
   return { entries, config };
-}
+});
 
 // ── File content ──────────────────────────────────────────────────────────
 

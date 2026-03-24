@@ -197,12 +197,32 @@ export default function Sidebar({ tree, isOpen }: SidebarProps) {
           position: "absolute",
           top: 0,
           right: 0,
-          width: "5px",
+          width: "10px",
           height: "100%",
           cursor: "col-resize",
           zIndex: 10,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
-      />
+      >
+        <svg
+          width="6"
+          height="24"
+          viewBox="0 0 6 24"
+          fill="var(--color-grey-300)"
+          style={{ pointerEvents: "none", flexShrink: 0 }}
+        >
+          <circle cx="1.5" cy="4"  r="1.5" />
+          <circle cx="4.5" cy="4"  r="1.5" />
+          <circle cx="1.5" cy="10" r="1.5" />
+          <circle cx="4.5" cy="10" r="1.5" />
+          <circle cx="1.5" cy="16" r="1.5" />
+          <circle cx="4.5" cy="16" r="1.5" />
+          <circle cx="1.5" cy="22" r="1.5" />
+          <circle cx="4.5" cy="22" r="1.5" />
+        </svg>
+      </div>
     </aside>
   );
 }

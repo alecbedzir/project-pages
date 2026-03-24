@@ -164,3 +164,8 @@ body {
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--color-grey-100); }
 ::-webkit-scrollbar-thumb { background: var(--color-grey-300); border-radius: 3px; }
+
+/* ── Loading spinner ─────────────────────────────────────────────────────── */
+@keyframes vaimo-spin {
+  to { transform: rotate(360deg); }
+}
