@@ -1,3 +1,4 @@
+import path from "path";
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import remarkRehype from "remark-rehype";
@@ -42,11 +43,44 @@ function rehypeMermaid() {
   };
 }
 
-export async function renderMarkdown(raw: string): Promise<string> {
-  const result = await remark()
+/**
+ * Rehype plugin: rewrites relative image src attributes to /api/raw?path=...
+ * so images stored alongside the markdown file in the GitHub repo load correctly.
+ */
+function rehypeRewriteImages(docFilePath: string) {
+  return (tree: any) => {
+    visit(tree, "element", (node: any) => {
+      if (node.tagName !== "img") return;
+      const src: string = node.properties?.src ?? "";
+      if (!src) return;
+      // Leave external URLs, data URIs, and server-absolute paths unchanged
+      if (
+        src.startsWith("http://") ||
+        src.startsWith("https://") ||
+        src.startsWith("data:") ||
+        src.startsWith("/")
+      ) return;
+
+      const docDir = docFilePath.includes("/")
+        ? docFilePath.slice(0, docFilePath.lastIndexOf("/"))
+        : "";
+      // path.posix.resolve handles ./, ../, and bare relative paths
+      const resolved = path.posix.resolve("/" + docDir, src); // e.g. "/docs/folder/images/pic.png"
+      const repoRelative = resolved.slice(1); // strip leading "/"
+      node.properties.src = `/api/raw?path=${encodeURIComponent(repoRelative)}`;
+    });
+  };
+}
+
+export async function renderMarkdown(raw: string, filePath?: string): Promise<string> {
+  const pipeline = remark()
     .use(remarkGfm)
     .use(remarkRehype, { allowDangerousHtml: true })
-    .use(rehypeMermaid)
+    .use(rehypeMermaid);
+
+  if (filePath) pipeline.use(rehypeRewriteImages, filePath);
+
+  const result = await pipeline
     .use(rehypeHighlight)
     .use(rehypeStringify, { allowDangerousHtml: true })
     .process(raw);

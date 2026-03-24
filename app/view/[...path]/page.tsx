@@ -48,7 +48,7 @@ export default async function ViewPage({ params }: Props) {
 
   if (MD_EXTS.has(ext)) {
     const raw = rawBuffer.toString("utf-8");
-    const html = await renderMarkdown(raw);
+    const html = await renderMarkdown(raw, filePath);
     content = <MarkdownView html={html} filePath={filePath} />;
   } else if (ext === "csv") {
     const raw = rawBuffer.toString("utf-8");
