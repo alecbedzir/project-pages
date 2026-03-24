@@ -2,15 +2,40 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import CommentForm from "@/components/Comments/CommentForm";
+import MermaidBlock from "./MermaidBlock";
 
 interface Props {
   html: string;
   filePath: string;
 }
 
+type Segment = { type: "html"; content: string } | { type: "mermaid"; code: string };
+
+function splitMermaid(html: string): Segment[] {
+  const segments: Segment[] = [];
+  const regex = /<div class="mermaid-placeholder" data-mermaid="([^"]+)"><\/div>/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(html)) !== null) {
+    if (match.index > lastIndex) {
+      segments.push({ type: "html", content: html.slice(lastIndex, match.index) });
+    }
+    segments.push({ type: "mermaid", code: decodeURIComponent(match[1]) });
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < html.length) {
+    segments.push({ type: "html", content: html.slice(lastIndex) });
+  }
+
+  return segments.length ? segments : [{ type: "html", content: html }];
+}
+
 const BLOCK_TAGS = new Set(["P", "LI", "H1", "H2", "H3", "H4", "H5", "H6", "TD", "TH", "BLOCKQUOTE", "DT", "DD"]);
 
 export default function MarkdownView({ html, filePath }: Props) {
+  const segments = splitMermaid(html);
   const articleRef = useRef<HTMLElement>(null);
   const [iconY, setIconY] = useState<number | null>(null);
   const [iconX, setIconX] = useState<number>(0);
@@ -64,11 +89,15 @@ export default function MarkdownView({ html, filePath }: Props) {
 
   return (
     <div onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
-      <article
-        ref={articleRef}
-        className="prose"
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+      <article ref={articleRef} className="prose">
+        {segments.map((seg, i) =>
+          seg.type === "html" ? (
+            <div key={i} dangerouslySetInnerHTML={{ __html: seg.content }} />
+          ) : (
+            <MermaidBlock key={i} code={seg.code} />
+          )
+        )}
+      </article>
 
       {/* Floating comment icon — follows cursor Y, anchored to right of article */}
       {iconY !== null && (
