@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Comment } from "@/lib/supabase";
 import CommentForm from "./CommentForm";
+import { useCommentPanel } from "@/components/ClientLayout";
 
 interface CommentPanelProps {
   filePath: string;
@@ -114,7 +115,7 @@ export default function CommentPanel({ filePath }: CommentPanelProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, setCollapsed } = useCommentPanel();
 
   const fetchComments = useCallback(async () => {
     setLoading(true);
@@ -159,7 +160,7 @@ export default function CommentPanel({ filePath }: CommentPanelProps) {
     >
       {/* Round toggle button — centred on the panel's left border */}
       <button
-        onClick={() => setCollapsed((v) => !v)}
+        onClick={() => setCollapsed(!collapsed)}
         title={collapsed ? "Expand comments" : "Collapse comments"}
         style={{
           position: "absolute",
