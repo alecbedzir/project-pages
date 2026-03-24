@@ -4,6 +4,7 @@ import { buildAuthOptions } from "@/lib/auth";
 import { getFilteredTree, getFileContent } from "@/lib/github";
 import { buildNavTree } from "@/lib/nav";
 import { renderMarkdown } from "@/lib/markdown";
+import { convertDocxToHtml } from "@/lib/docx";
 import TopNav from "@/components/TopNav";
 import Sidebar from "@/components/Sidebar";
 import MarkdownView from "@/components/FileView/MarkdownView";
@@ -17,6 +18,7 @@ type Props = { params: Promise<{ path: string[] }> };
 
 const IMAGE_EXTS = new Set(["png", "jpg", "jpeg", "gif", "webp", "svg"]);
 const MD_EXTS = new Set(["md", "mdx"]);
+const DOCX_EXTS = new Set(["docx", "docm"]);
 
 export default async function ViewPage({ params }: Props) {
   const session = await getServerSession(await buildAuthOptions());
@@ -53,6 +55,9 @@ export default async function ViewPage({ params }: Props) {
   } else if (ext === "csv") {
     const raw = rawBuffer.toString("utf-8");
     content = <CsvView rawCsv={raw} />;
+  } else if (DOCX_EXTS.has(ext)) {
+    const html = await convertDocxToHtml(rawBuffer);
+    content = <MarkdownView html={html} filePath={filePath} />;
   } else if (IMAGE_EXTS.has(ext)) {
     content = (
       <ImageView
