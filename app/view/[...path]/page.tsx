@@ -5,6 +5,7 @@ import { convertDocxToHtml } from "@/lib/docx";
 import MarkdownView from "@/components/FileView/MarkdownView";
 import CsvView from "@/components/FileView/CsvView";
 import ImageView from "@/components/FileView/ImageView";
+import SubtitleView from "@/components/FileView/SubtitleView";
 import DownloadButton from "@/components/DownloadButton";
 import CommentPanel from "@/components/Comments/CommentPanel";
 
@@ -13,6 +14,7 @@ type Props = { params: Promise<{ path: string[] }> };
 const IMAGE_EXTS = new Set(["png", "jpg", "jpeg", "gif", "webp", "svg"]);
 const MD_EXTS = new Set(["md", "mdx"]);
 const DOCX_EXTS = new Set(["docx", "docm"]);
+const SUBTITLE_EXTS = new Set(["vtt", "srt"]);
 
 export default async function ViewPage({ params }: Props) {
   const { path: segments } = await params;
@@ -45,6 +47,9 @@ export default async function ViewPage({ params }: Props) {
   } else if (DOCX_EXTS.has(ext)) {
     const html = await convertDocxToHtml(rawBuffer);
     content = <MarkdownView html={html} filePath={filePath} commentsEnabled={commentsEnabled} />;
+  } else if (SUBTITLE_EXTS.has(ext)) {
+    const raw = rawBuffer.toString("utf-8");
+    content = <SubtitleView raw={raw} format={ext as "vtt" | "srt"} />;
   } else if (IMAGE_EXTS.has(ext)) {
     content = (
       <ImageView

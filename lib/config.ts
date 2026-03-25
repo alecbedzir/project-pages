@@ -67,8 +67,9 @@ export function parseConfig(raw: string): ParsedConfig {
 }
 
 const IMAGE_EXTENSIONS = new Set(["png", "jpg", "jpeg", "gif", "webp", "svg"]);
+const SUBTITLE_EXTENSIONS = new Set(["vtt", "srt"]);
 
-export { IMAGE_EXTENSIONS };
+export { IMAGE_EXTENSIONS, SUBTITLE_EXTENSIONS };
 
 /**
  * Given a list of all file paths in the repo, returns only those
@@ -84,6 +85,12 @@ export function filterPaths(allPaths: string[], config: ParsedConfig): string[] 
       if (IMAGE_EXTENSIONS.has(ext)) included.add(p);
     });
   }
+
+  // Always include subtitle files (.vtt, .srt) so they appear in the nav
+  allPaths.forEach((p) => {
+    const ext = p.split(".").pop()?.toLowerCase() ?? "";
+    if (SUBTITLE_EXTENSIONS.has(ext)) included.add(p);
+  });
 
   const includedArr = Array.from(included);
   if (!config.exclude.length) return includedArr;
