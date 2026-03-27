@@ -10,12 +10,24 @@ import type { Comment } from "./supabase";
 
 export interface OutlineHeading { level: number; id: string; text: string; }
 
+function decodeEntities(s: string): string {
+  return s
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(parseInt(d, 10)));
+}
+
 export function extractHeadings(html: string): OutlineHeading[] {
   const headings: OutlineHeading[] = [];
   const regex = /<h([1-4])[^>]*\bid="([^"]+)"[^>]*>([\s\S]*?)<\/h\1>/g;
   let match: RegExpExecArray | null;
   while ((match = regex.exec(html)) !== null) {
-    const text = match[3].replace(/<[^>]+>/g, "").trim();
+    const text = decodeEntities(match[3].replace(/<[^>]+>/g, "")).trim();
     if (text) headings.push({ level: parseInt(match[1], 10), id: match[2], text });
   }
   return headings;
