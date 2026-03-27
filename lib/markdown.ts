@@ -3,6 +3,7 @@ import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import remarkRehype from "remark-rehype";
 import rehypeHighlight from "rehype-highlight";
+import rehypeSlug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
 import { visit } from "unist-util-visit";
 import type { Comment } from "./supabase";
@@ -76,7 +77,8 @@ export async function renderMarkdown(raw: string, filePath?: string): Promise<st
   const pipeline = remark()
     .use(remarkGfm)
     .use(remarkRehype, { allowDangerousHtml: true })
-    .use(rehypeMermaid);
+    .use(rehypeMermaid)
+    .use(rehypeSlug);
 
   if (filePath) pipeline.use(rehypeRewriteImages, filePath);
 

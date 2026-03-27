@@ -81,6 +81,19 @@ export default function MarkdownView({ html, filePath, commentsEnabled = true }:
 
   useEffect(() => () => { if (hideTimer.current) clearTimeout(hideTimer.current); }, []);
 
+  // Scroll to hash on initial load and on hash changes
+  useEffect(() => {
+    const scrollToHash = () => {
+      const id = window.location.hash.slice(1);
+      if (!id) return;
+      const el = document.getElementById(id);
+      if (el) requestAnimationFrame(() => el.scrollIntoView({ behavior: "smooth", block: "start" }));
+    };
+    scrollToHash();
+    window.addEventListener("hashchange", scrollToHash);
+    return () => window.removeEventListener("hashchange", scrollToHash);
+  }, []);
+
   const handleIconClick = useCallback(() => {
     if (iconY === null) return;
     setFormY(iconY);
@@ -88,8 +101,21 @@ export default function MarkdownView({ html, filePath, commentsEnabled = true }:
     setIconY(null);
   }, [iconY]);
 
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    const anchor = (e.target as HTMLElement).closest("a");
+    if (!anchor) return;
+    const href = anchor.getAttribute("href");
+    if (!href?.startsWith("#")) return;
+    e.preventDefault();
+    const el = document.getElementById(href.slice(1));
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      history.pushState(null, "", href);
+    }
+  }, []);
+
   return (
-    <div onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
+    <div onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave} onClick={handleClick}>
       <article ref={articleRef} className="prose">
         {segments.map((seg, i) =>
           seg.type === "html" ? (
