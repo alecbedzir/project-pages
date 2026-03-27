@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getFilteredTree, getFileContent } from "@/lib/github";
-import { renderMarkdown } from "@/lib/markdown";
+import { renderMarkdown, extractHeadings } from "@/lib/markdown";
 import { convertDocxToHtml } from "@/lib/docx";
 import MarkdownView from "@/components/FileView/MarkdownView";
 import CsvView from "@/components/FileView/CsvView";
@@ -40,7 +40,8 @@ export default async function ViewPage({ params }: Props) {
     const raw = rawBuffer.toString("utf-8");
     hasRelativeImages = /!\[[^\]]*\]\((?!https?:\/\/)(?!data:)[^\s)]+/.test(raw);
     const html = await renderMarkdown(raw, filePath);
-    content = <MarkdownView html={html} filePath={filePath} commentsEnabled={commentsEnabled} />;
+    const headings = extractHeadings(html);
+    content = <MarkdownView html={html} filePath={filePath} commentsEnabled={commentsEnabled} headings={headings} />;
   } else if (ext === "csv") {
     const raw = rawBuffer.toString("utf-8");
     content = <CsvView rawCsv={raw} />;

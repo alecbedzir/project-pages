@@ -8,6 +8,19 @@ import rehypeStringify from "rehype-stringify";
 import { visit } from "unist-util-visit";
 import type { Comment } from "./supabase";
 
+export interface OutlineHeading { level: number; id: string; text: string; }
+
+export function extractHeadings(html: string): OutlineHeading[] {
+  const headings: OutlineHeading[] = [];
+  const regex = /<h([1-4])[^>]*\bid="([^"]+)"[^>]*>([\s\S]*?)<\/h\1>/g;
+  let match: RegExpExecArray | null;
+  while ((match = regex.exec(html)) !== null) {
+    const text = match[3].replace(/<[^>]+>/g, "").trim();
+    if (text) headings.push({ level: parseInt(match[1], 10), id: match[2], text });
+  }
+  return headings;
+}
+
 /**
  * Rehype plugin: transforms ```mermaid code blocks into
  * <div class="mermaid-placeholder" data-mermaid="...urlencoded...">

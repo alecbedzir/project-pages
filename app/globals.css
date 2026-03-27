@@ -161,6 +161,11 @@ body {
   margin-left: 1px;
 }
 
+/* ── Outline panel ───────────────────────────────────────────────────────── */
+.outline-link:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
 /* ── Scrollbar (subtle) ──────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--color-grey-100); }
