@@ -1,19 +1,19 @@
-# vaimopages.config.example
+# projectpages.config.example
 #
-# This is the Vaimo Pages configuration file — a reference showing all
+# This is the Project Pages configuration file — a reference showing all
 # supported options with inline documentation.
 #
 # ── How to use this file ────────────────────────────────────────────────────
 #
 #   1. Copy this file to the ROOT of your knowledge-base repository.
-#   2. Rename it to exactly:  vaimopages.config   (no file extension)
+#   2. Rename it to exactly:  projectpages.config   (no file extension)
 #   3. The file must be present in EVERY Git branch of that repository
-#      that Vaimo Pages should serve content from.
+#      that Project Pages should serve content from.
 #
 # ── File location ───────────────────────────────────────────────────────────
 #
 #   <your-knowledge-base-repo>/
-#   └── vaimopages.config    ← place it here, in every relevant branch
+#   └── projectpages.config    ← place it here, in every relevant branch
 #
 # ── Format ──────────────────────────────────────────────────────────────────
 #
@@ -25,12 +25,6 @@
 site:
   title: "My Project Docs"         # Required. Shown in browser tab and top nav.
   description: "Internal docs"     # Optional. Subtitle shown on the home page.
-
-# ── Source repository ────────────────────────────────────────────────────────
-source:
-  repo: "myorg/my-docs-repo"       # Required. GitHub "owner/repo" of this repository.
-                                   # The Vaimo Pages app uses this to fetch content
-                                   # via the GitHub API.
 
 # ── Session settings ─────────────────────────────────────────────────────────
 auth:

@@ -4,7 +4,7 @@
 
 Comments are stored in **Supabase** (PostgreSQL). They are scoped to a file path **and** a Git branch, so each branch audience sees only its own comments.
 
-Comments are disabled by default. To enable them for a branch, set `comments.enabled: true` in `vaimopages.config`:
+Comments are disabled by default. To enable them for a branch, set `comments.enabled: true` in `projectpages.config`:
 
 ```yaml
 branches:

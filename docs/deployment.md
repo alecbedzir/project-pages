@@ -26,7 +26,7 @@ npm run dev
 
 | Variable | Required | Description |
 |---|---|---|
-| `DOCS_REPO` | Yes | `owner/repo` of the documentation repository (e.g. `vaimo/my-docs`) |
+| `DOCS_REPO` | Yes | `owner/repo` of the documentation repository (e.g. `vaimo/my-docs`). See below. |
 | `GITHUB_TOKEN` | Yes | Personal access token with read access to `DOCS_REPO` |
 | `GITHUB_WEBHOOK_SECRET` | Yes | Secret shared with the GitHub webhook for signature validation |
 | `NEXTAUTH_SECRET` | Yes | Random string for NextAuth JWT signing. Rotate to invalidate all sessions. |
@@ -35,7 +35,29 @@ npm run dev
 | `SUPABASE_SERVICE_ROLE_KEY` | Yes | Supabase service role key (server-side only, never exposed to browser) |
 | `VERCEL_DEPLOY_HOOK_URL` | Yes | Vercel deploy hook URL, called when docs repo receives a push |
 
-> `AUTH_PASSPHRASE` is no longer used. Passphrases are defined in `vaimopages.config` inside the docs repository.
+> `AUTH_PASSPHRASE` is no longer used. Passphrases are defined in `projectpages.config` inside the docs repository.
+
+---
+
+### `DOCS_REPO`
+
+This is the most important environment variable. It tells the app **which GitHub repository to use for all content**.
+
+```
+DOCS_REPO=vaimo/my-docs-repo
+```
+
+The value must be in `owner/repo` format. It controls three things:
+
+1. **Where `projectpages.config` is read from** — the app fetches `projectpages.config` from this repository's default branch on every request (cached for 60 seconds).
+2. **Where all file content is fetched from** — every file tree request, file view, image, and download is served from this repository, on the branch that matches the user's passphrase.
+3. **What the `GITHUB_TOKEN` needs access to** — the token must have Contents: Read-only access to this exact repository.
+
+If `DOCS_REPO` is not set when the app starts, all content requests will fail immediately. The app will render an error page and log a clear message to the server console. There is nothing inside `projectpages.config` that can override or substitute this value.
+
+**One deployment = one repository.** If you need to serve a different knowledge-base repository, deploy a separate instance of the app with a different `DOCS_REPO` value.
+
+---
 
 ### Generating secrets
 
@@ -103,6 +125,11 @@ Next.js 15 requires any component calling `useSearchParams()` to be a child of `
 3. Verify `VERCEL_DEPLOY_HOOK_URL` is set in Vercel (not just locally).
 4. Check Vercel function logs (**Deployments → Functions**) for errors from `/api/webhook/github`.
 
+### App shows "Unable to load content"
+
+- Check server logs for a `[projectpages]` prefixed message — it will say exactly what is wrong.
+- Most commonly: `DOCS_REPO` is not set, is set to an invalid format, or `GITHUB_TOKEN` lacks access.
+
 ### GitHub API returns 401 or 404
 
 - `GITHUB_TOKEN` has expired or was revoked. Generate a new one.
@@ -117,6 +144,6 @@ Next.js 15 requires any component calling `useSearchParams()` to be a child of `
 
 ### Passphrase accepted but wrong content shown
 
-- Verify the `name` in `vaimopages.config` exactly matches the Git branch name.
+- Verify the `name` in `projectpages.config` exactly matches the Git branch name.
 - Verify the branch exists in the docs repository.
 - Check Vercel logs for GitHub API errors when fetching the tree.

@@ -42,7 +42,7 @@ vaimo-pages/
 ├── lib/
 │   ├── github.ts          # GitHub API client, config loader, file fetching
 │   ├── supabase.ts        # Supabase client, comment CRUD
-│   ├── config.ts          # vaimopages.config parser + glob filter
+│   ├── config.ts          # projectpages.config parser + glob filter
 │   ├── auth.ts            # NextAuth options (branch-based passphrase auth)
 │   ├── nav.ts             # File tree → sidebar nav builder
 │   ├── markdown.ts        # Markdown rendering + comment annotation
@@ -65,7 +65,7 @@ vaimo-pages/
 │
 ├── docs/                  # This documentation
 │
-├── vaimopages.config.example   # Config template for knowledge-base repos
+├── projectpages.config.example   # Config template for knowledge-base repos
 ├── .env.local.example
 ├── vercel.json
 └── package.json
@@ -75,7 +75,7 @@ vaimo-pages/
 
 | File | Purpose |
 |---|---|
-| `lib/config.ts` | Parses `vaimopages.config` YAML; defines `ParsedConfig`, `ParsedBranch` types |
+| `lib/config.ts` | Parses `projectpages.config` YAML; defines `ParsedConfig`, `ParsedBranch` types |
 | `lib/github.ts` | All GitHub API calls; accepts `branch` param for per-branch content fetching |
 | `lib/auth.ts` | NextAuth options; matches passphrase → branch; stores `branchName` in JWT |
 | `lib/supabase.ts` | Comment CRUD; all queries are scoped by `(file_path, branch)` |

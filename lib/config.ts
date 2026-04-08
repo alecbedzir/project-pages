@@ -14,9 +14,6 @@ export interface VaimoConfig {
     title: string;
     description?: string;
   };
-  source: {
-    repo: string;
-  };
   auth?: {
     sessionDurationDays?: number;
   };
@@ -36,7 +33,6 @@ export interface ParsedBranch {
 
 export interface ParsedConfig {
   site: { title: string; description: string };
-  source: { repo: string };
   auth: { sessionDurationDays: number };
   branches: ParsedBranch[];
   features: { images: boolean };
@@ -49,18 +45,14 @@ const DEFAULT_SESSION_DAYS = 7;
 export function parseConfig(raw: string): ParsedConfig {
   const parsed = yaml.load(raw) as VaimoConfig;
 
-  if (!parsed?.site?.title) throw new Error("vaimopages.config: site.title is required");
-  if (!parsed?.source?.repo) throw new Error("vaimopages.config: source.repo is required");
-  if (!parsed?.include?.length) throw new Error("vaimopages.config: include list must not be empty");
-  if (!parsed?.branches?.length) throw new Error("vaimopages.config: branches list must not be empty");
+  if (!parsed?.site?.title) throw new Error("projectpages.config: site.title is required");
+  if (!parsed?.include?.length) throw new Error("projectpages.config: include list must not be empty");
+  if (!parsed?.branches?.length) throw new Error("projectpages.config: branches list must not be empty");
 
   return {
     site: {
       title: parsed.site.title,
       description: parsed.site.description ?? "",
-    },
-    source: {
-      repo: parsed.source.repo,
     },
     auth: {
       sessionDurationDays: parsed.auth?.sessionDurationDays ?? DEFAULT_SESSION_DAYS,

@@ -1,6 +1,4 @@
-type Props = { repo: string };
-
-export default function ConfigError({ repo }: Props) {
+export default function ConfigError() {
   return (
     <div
       style={{
@@ -30,10 +28,15 @@ export default function ConfigError({ repo }: Props) {
             color: "var(--color-grey-900)",
           }}
         >
-          Unable to load configuration
+          Unable to load content
         </p>
         <p style={{ margin: "0 0 0.5rem", color: "var(--color-grey-700)", fontSize: "0.9375rem" }}>
-          We tried reaching <strong>{repo}</strong> but could not read the{" "}
+          The application could not reach the content repository. This is usually a configuration
+          issue — check the server logs for details.
+        </p>
+        <p style={{ margin: 0, color: "var(--color-grey-500)", fontSize: "0.875rem" }}>
+          Make sure <code style={{ fontSize: "0.875em" }}>DOCS_REPO</code> is set in the environment
+          and that a valid{" "}
           <code
             style={{
               background: "var(--color-grey-100)",
@@ -42,15 +45,9 @@ export default function ConfigError({ repo }: Props) {
               fontSize: "0.875em",
             }}
           >
-            vaimopages.config
+            projectpages.config
           </code>{" "}
-          file. It may be missing, inaccessible, or malformed.
-        </p>
-        <p style={{ margin: 0, color: "var(--color-grey-500)", fontSize: "0.875rem" }}>
-          Make sure the file exists at the root of the repository and contains valid YAML with the
-          required <code style={{ fontSize: "0.875em" }}>site.title</code>,{" "}
-          <code style={{ fontSize: "0.875em" }}>source.repo</code>, and{" "}
-          <code style={{ fontSize: "0.875em" }}>include</code> fields.
+          file exists at the root of that repository.
         </p>
       </div>
     </div>

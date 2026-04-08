@@ -11,12 +11,12 @@ export default async function GalleryLayout({ children }: { children: React.Reac
   const session = await getServerSession(await buildAuthOptions());
   if (!session) redirect("/auth/signin");
 
-  const repo = process.env.DOCS_REPO ?? "the configured repository";
   let filteredTree: Awaited<ReturnType<typeof getFilteredTree>>;
   try {
     filteredTree = await getFilteredTree(session.branchName);
-  } catch {
-    return <ConfigError repo={repo} />;
+  } catch (err) {
+    console.error("[projectpages] Failed to load file tree in gallery layout:", err);
+    return <ConfigError />;
   }
   const { entries, config } = filteredTree;
   const nav = buildNavTree(entries);

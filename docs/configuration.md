@@ -1,8 +1,10 @@
-# `vaimopages.config` Reference
+# `projectpages.config` Reference
 
-This YAML file must exist at the root of your documentation repository. It must be present in **every Git branch** that Vaimo Pages serves. The app reads it on every request (with a 60-second in-memory cache), always from the repository's default branch.
+This YAML file must exist at the root of your documentation repository. It must be present in **every Git branch** that Project Pages serves. The app reads it on every request (with a 60-second in-memory cache), always from the repository's default branch.
 
-A ready-to-copy template is provided at [`vaimopages.config.example`](../vaimopages.config.example) in this repository.
+The repository itself is identified by the `DOCS_REPO` environment variable set in the Project Pages deployment — **not** by anything inside this config file. See [Deployment → DOCS_REPO](./deployment.md#docs_repo) for details.
+
+A ready-to-copy template is provided at [`projectpages.config.example`](../projectpages.config.example) in this repository.
 
 ---
 
@@ -12,9 +14,6 @@ A ready-to-copy template is provided at [`vaimopages.config.example`](../vaimopa
 site:
   title: "My Project Docs"
   description: "Internal docs"
-
-source:
-  repo: "myorg/my-docs-repo"
 
 auth:
   sessionDurationDays: 7
@@ -53,12 +52,6 @@ exclude:
 | `site.title` | Yes | Displayed in the browser tab and top nav |
 | `site.description` | No | Subtitle shown on the home/index page |
 
-### `source`
-
-| Field | Required | Description |
-|---|---|---|
-| `source.repo` | Yes | `owner/repo` string identifying the docs repository on GitHub |
-
 ### `auth`
 
 | Field | Required | Description |
@@ -67,11 +60,11 @@ exclude:
 
 ### `branches`
 
-A list of Git branches that Vaimo Pages can serve. At least one entry is required.
+A list of Git branches that Project Pages can serve. At least one entry is required.
 
 | Field | Required | Description |
 |---|---|---|
-| `branches[].name` | Yes | The Git branch name (must exist in the source repo) |
+| `branches[].name` | Yes | The Git branch name (must exist in the repository) |
 | `branches[].passphrase` | Yes | Plain-text passphrase that grants access to this branch |
 | `branches[].comments.enabled` | No | Whether inline comments are enabled for this branch. Defaults to `false`. |
 
@@ -104,7 +97,8 @@ Optional. A list of glob patterns. Files matching any pattern are hidden, even i
 
 ## Troubleshooting
 
-- The file must be named exactly `vaimopages.config` (no extension) and live at the repository root.
-- `site.title`, `source.repo`, at least one `include` pattern, and at least one `branches` entry are required.
+- The file must be named exactly `projectpages.config` (no extension) and live at the repository root.
+- `site.title`, at least one `include` pattern, and at least one `branches` entry are required.
 - The file is parsed as YAML — check indentation and quoting if you see parse errors in Vercel logs.
 - Passphrases are compared exactly (case-sensitive, whitespace-sensitive).
+- The repository being read is determined entirely by the `DOCS_REPO` env var in the app — there is no `source.repo` field in this config.

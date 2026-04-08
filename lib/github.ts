@@ -11,10 +11,18 @@ function octokit(): Octokit {
   return _octokit;
 }
 
-/** Splits "owner/repo" into { owner, repo }. */
-function splitRepo(repo: string): { owner: string; repo: string } {
-  const [owner, name] = repo.split("/");
-  if (!owner || !name) throw new Error(`Invalid repo format: "${repo}". Expected "owner/repo".`);
+/** Splits "owner/repo" into { owner, repo }. Throws if DOCS_REPO is unset. */
+function getDocsRepo(): { owner: string; repo: string } {
+  const docsRepo = process.env.DOCS_REPO;
+  if (!docsRepo) {
+    console.error("[projectpages] DOCS_REPO environment variable is not set. The app cannot load any content without it.");
+    throw new Error("DOCS_REPO is not configured");
+  }
+  const [owner, name] = docsRepo.split("/");
+  if (!owner || !name) {
+    console.error(`[projectpages] DOCS_REPO value "${docsRepo}" is not valid. Expected format: owner/repo`);
+    throw new Error("DOCS_REPO is misconfigured");
+  }
   return { owner, repo: name };
 }
 
@@ -29,19 +37,16 @@ export async function getConfig(): Promise<ParsedConfig> {
     return _configCache.config;
   }
 
-  const docsRepo = process.env.DOCS_REPO;
-  if (!docsRepo) throw new Error("DOCS_REPO environment variable is not set");
-
-  const { owner, repo } = splitRepo(docsRepo);
+  const { owner, repo } = getDocsRepo();
 
   const { data } = await octokit().repos.getContent({
     owner,
     repo,
-    path: "vaimopages.config",
+    path: "projectpages.config",
   });
 
   if (Array.isArray(data) || data.type !== "file") {
-    throw new Error("vaimopages.config not found or is not a file");
+    throw new Error("projectpages.config not found or is not a file");
   }
 
   const raw = Buffer.from(data.content, "base64").toString("utf-8");
@@ -67,7 +72,7 @@ export interface TreeEntry {
 
 export const getFilteredTree = cache(async (branch: string): Promise<{ entries: TreeEntry[]; config: ParsedConfig }> => {
   const config = await getConfig();
-  const { owner, repo } = splitRepo(config.source.repo);
+  const { owner, repo } = getDocsRepo();
 
   const { data } = await octokit().git.getTree({
     owner,
@@ -105,8 +110,7 @@ export interface FileContent {
 }
 
 export async function getFileContent(filePath: string, branch: string): Promise<FileContent> {
-  const config = await getConfig();
-  const { owner, repo } = splitRepo(config.source.repo);
+  const { owner, repo } = getDocsRepo();
 
   const { data } = await octokit().repos.getContent({
     owner,
