@@ -6,15 +6,17 @@ import { updateComment, deleteComment } from "@/lib/supabase";
 
 type Params = { params: Promise<{ id: string }> };
 
-async function checkComments() {
+async function checkComments(branchName: string): Promise<boolean> {
   const config = await getConfig();
-  return config.comments.enabled;
+  return config.branches.find((b) => b.name === branchName)?.comments.enabled ?? false;
 }
 
 export async function PATCH(req: NextRequest, { params }: Params) {
   const session = await getServerSession(await buildAuthOptions());
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!await checkComments()) return NextResponse.json({ error: "Comments are disabled" }, { status: 403 });
+  if (!await checkComments(session.branchName)) {
+    return NextResponse.json({ error: "Comments are disabled" }, { status: 403 });
+  }
 
   const { id } = await params;
   const { body, author_email } = await req.json();
@@ -35,7 +37,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 export async function DELETE(req: NextRequest, { params }: Params) {
   const session = await getServerSession(await buildAuthOptions());
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!await checkComments()) return NextResponse.json({ error: "Comments are disabled" }, { status: 403 });
+  if (!await checkComments(session.branchName)) {
+    return NextResponse.json({ error: "Comments are disabled" }, { status: 403 });
+  }
 
   const { id } = await params;
   const { author_email } = await req.json();

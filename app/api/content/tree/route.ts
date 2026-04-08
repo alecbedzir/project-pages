@@ -9,7 +9,7 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    const { entries, config } = await getFilteredTree();
+    const { entries, config } = await getFilteredTree(session.branchName);
     const nav = buildNavTree(entries);
     return NextResponse.json({ nav, site: config.site });
   } catch (err) {

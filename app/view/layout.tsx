@@ -14,7 +14,7 @@ export default async function ViewLayout({ children }: { children: React.ReactNo
   const repo = process.env.DOCS_REPO ?? "the configured repository";
   let filteredTree: Awaited<ReturnType<typeof getFilteredTree>>;
   try {
-    filteredTree = await getFilteredTree();
+    filteredTree = await getFilteredTree(session.branchName);
   } catch {
     return <ConfigError repo={repo} />;
   }

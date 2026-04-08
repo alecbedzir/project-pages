@@ -10,20 +10,23 @@ export async function GET(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const config = await getConfig();
-  if (!config.comments.enabled) return NextResponse.json({ error: "Comments are disabled" }, { status: 403 });
+  const branchConfig = config.branches.find((b) => b.name === session.branchName);
+  if (!branchConfig?.comments.enabled) {
+    return NextResponse.json({ error: "Comments are disabled" }, { status: 403 });
+  }
 
   const filePath = req.nextUrl.searchParams.get("path");
   if (!filePath) return NextResponse.json({ error: "path is required" }, { status: 400 });
 
   try {
-    const { entries } = await getFilteredTree();
+    const { entries } = await getFilteredTree(session.branchName);
     const allowed = new Set(entries.map((e) => e.path));
     if (!allowed.has(filePath)) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const comments = await getComments(filePath);
-    const { buffer, name } = await getRawFileBuffer(filePath);
+    const comments = await getComments(filePath, session.branchName);
+    const { buffer, name } = await getRawFileBuffer(filePath, session.branchName);
 
     const ext = name.split(".").pop()?.toLowerCase() ?? "";
 

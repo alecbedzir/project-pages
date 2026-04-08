@@ -9,13 +9,16 @@ export async function GET(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const config = await getConfig();
-  if (!config.comments.enabled) return NextResponse.json({ error: "Comments are disabled" }, { status: 403 });
+  const branchConfig = config.branches.find((b) => b.name === session.branchName);
+  if (!branchConfig?.comments.enabled) {
+    return NextResponse.json({ error: "Comments are disabled" }, { status: 403 });
+  }
 
   const filePath = req.nextUrl.searchParams.get("path");
   if (!filePath) return NextResponse.json({ error: "path is required" }, { status: 400 });
 
   try {
-    const comments = await getComments(filePath);
+    const comments = await getComments(filePath, session.branchName);
     return NextResponse.json(comments);
   } catch (err) {
     console.error("GET comments error:", err);
@@ -28,7 +31,10 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const config = await getConfig();
-  if (!config.comments.enabled) return NextResponse.json({ error: "Comments are disabled" }, { status: 403 });
+  const branchConfig = config.branches.find((b) => b.name === session.branchName);
+  if (!branchConfig?.comments.enabled) {
+    return NextResponse.json({ error: "Comments are disabled" }, { status: 403 });
+  }
 
   try {
     const body = await req.json();
@@ -40,6 +46,7 @@ export async function POST(req: NextRequest) {
 
     const comment = await createComment({
       file_path,
+      branch: session.branchName,
       anchor: anchor ?? null,
       parent_id: parent_id ?? null,
       author_name,

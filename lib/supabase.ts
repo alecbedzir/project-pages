@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 export type Comment = {
   id: string;
   file_path: string;
+  branch: string;
   anchor: string | null;
   parent_id: string | null;
   author_name: string;
@@ -19,11 +20,12 @@ function getClient() {
   return createClient(url, key);
 }
 
-export async function getComments(filePath: string): Promise<Comment[]> {
+export async function getComments(filePath: string, branch: string): Promise<Comment[]> {
   const { data, error } = await getClient()
     .from("comments")
     .select("*")
     .eq("file_path", filePath)
+    .eq("branch", branch)
     .order("created_at", { ascending: true });
 
   if (error) throw error;

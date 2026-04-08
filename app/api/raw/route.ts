@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const { buffer, name } = await getRawFileBuffer(filePath);
+    const { buffer, name } = await getRawFileBuffer(filePath, session.branchName);
     const contentType = mime.getType(name) ?? "application/octet-stream";
 
     return new NextResponse(new Uint8Array(buffer), {

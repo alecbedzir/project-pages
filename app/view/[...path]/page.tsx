@@ -1,4 +1,6 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { buildAuthOptions } from "@/lib/auth";
 import { getFilteredTree, getFileContent } from "@/lib/github";
 import { renderMarkdown, extractHeadings } from "@/lib/markdown";
 import { convertDocxToHtml } from "@/lib/docx";
@@ -17,24 +19,29 @@ const DOCX_EXTS = new Set(["docx", "docm"]);
 const SUBTITLE_EXTS = new Set(["vtt", "srt"]);
 
 export default async function ViewPage({ params }: Props) {
+  const session = await getServerSession(await buildAuthOptions());
+  if (!session) redirect("/auth/signin");
+
   const { path: segments } = await params;
   const filePath = segments.map(decodeURIComponent).join("/");
 
   // getFilteredTree is wrapped with React cache() — no extra network call vs layout
-  const { entries, config } = await getFilteredTree();
+  const { entries, config } = await getFilteredTree(session.branchName);
 
   const entry = entries.find((e) => e.path === filePath);
   if (!entry) notFound();
 
-  const file = await getFileContent(filePath);
+  const file = await getFileContent(filePath, session.branchName);
   const ext = filePath.split(".").pop()?.toLowerCase() ?? "";
   const fileName = filePath.split("/").pop() ?? filePath;
   const rawBuffer = Buffer.from(file.content, "base64");
 
-  let content: React.ReactNode;
-  const commentsEnabled = config.comments.enabled;
+  const branchConfig = config.branches.find((b) => b.name === session.branchName);
+  const commentsEnabled = branchConfig?.comments.enabled ?? false;
   let showComments = commentsEnabled;
   let hasRelativeImages = false;
+
+  let content: React.ReactNode;
 
   if (MD_EXTS.has(ext)) {
     const raw = rawBuffer.toString("utf-8");

@@ -17,7 +17,7 @@ export default async function HomePage() {
   const repo = process.env.DOCS_REPO ?? "the configured repository";
   let filteredTree: Awaited<ReturnType<typeof getFilteredTree>>;
   try {
-    filteredTree = await getFilteredTree();
+    filteredTree = await getFilteredTree(session.branchName);
   } catch {
     return <ConfigError repo={repo} />;
   }
@@ -27,11 +27,13 @@ export default async function HomePage() {
   // Look for a root-level README (case-insensitive, md or mdx)
   const readmeEntry = entries.find((e) => /^readme\.(md|mdx)$/i.test(e.path));
 
+  const branchConfig = config.branches.find((b) => b.name === session.branchName);
+  const commentsEnabled = branchConfig?.comments.enabled ?? false;
+
   let mainContent: React.ReactNode;
-  const commentsEnabled = config.comments.enabled;
 
   if (readmeEntry) {
-    const file = await getFileContent(readmeEntry.path);
+    const file = await getFileContent(readmeEntry.path, session.branchName);
     const raw = Buffer.from(file.content, "base64").toString("utf-8");
     const html = await renderMarkdown(raw, readmeEntry.path);
     mainContent = <MarkdownView html={html} filePath={readmeEntry.path} commentsEnabled={commentsEnabled} />;

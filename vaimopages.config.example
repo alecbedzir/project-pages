@@ -1,0 +1,87 @@
+# vaimopages.config.example
+#
+# This is the Vaimo Pages configuration file — a reference showing all
+# supported options with inline documentation.
+#
+# ── How to use this file ────────────────────────────────────────────────────
+#
+#   1. Copy this file to the ROOT of your knowledge-base repository.
+#   2. Rename it to exactly:  vaimopages.config   (no file extension)
+#   3. The file must be present in EVERY Git branch of that repository
+#      that Vaimo Pages should serve content from.
+#
+# ── File location ───────────────────────────────────────────────────────────
+#
+#   <your-knowledge-base-repo>/
+#   └── vaimopages.config    ← place it here, in every relevant branch
+#
+# ── Format ──────────────────────────────────────────────────────────────────
+#
+#   YAML. Indentation matters. Use spaces, not tabs.
+#
+# ────────────────────────────────────────────────────────────────────────────
+
+# ── Site identity ────────────────────────────────────────────────────────────
+site:
+  title: "My Project Docs"         # Required. Shown in browser tab and top nav.
+  description: "Internal docs"     # Optional. Subtitle shown on the home page.
+
+# ── Source repository ────────────────────────────────────────────────────────
+source:
+  repo: "myorg/my-docs-repo"       # Required. GitHub "owner/repo" of this repository.
+                                   # The Vaimo Pages app uses this to fetch content
+                                   # via the GitHub API.
+
+# ── Session settings ─────────────────────────────────────────────────────────
+auth:
+  sessionDurationDays: 7           # Optional. How long a login session lasts.
+                                   # Default: 7. Set to 1 for short-lived access.
+
+# ── Branches ─────────────────────────────────────────────────────────────────
+#
+# Each entry maps a Git branch to a passphrase. Users who enter the passphrase
+# are granted access to that branch's content exclusively. Multiple branches
+# can coexist in the same repo — e.g. one for internal use and one for clients.
+#
+# Rules:
+#   - At least one branch is required.
+#   - "name" must match an existing Git branch in the source repo.
+#   - "passphrase" is stored in plain text here; treat this file like a secret.
+#   - "comments.enabled" controls inline comments for that audience (default: false).
+#
+branches:
+  - name: master                        # Git branch name
+    passphrase: "replace-with-secret"   # Passphrase that unlocks this branch
+    comments:
+      enabled: false                    # Optional. Default: false.
+
+  - name: client                        # Example: curated client-facing branch
+    passphrase: "replace-with-another-secret"
+    comments:
+      enabled: false
+
+  # Add more branches as needed:
+  # - name: external-partner
+  #   passphrase: "partner-secret"
+  #   comments:
+  #     enabled: false
+
+# ── Content filters ───────────────────────────────────────────────────────────
+#
+# "include" defines which files are visible. Supports full glob syntax.
+# At least one pattern is required.
+#
+# "exclude" hides files that matched include. Optional.
+# Useful for hiding drafts or internal files in shared branches.
+#
+include:
+  - "**/*.md"
+  - "**/*.csv"
+  - "**/*.docx"
+  - "**/*.vtt"
+  - "**/*.srt"
+
+exclude:                           # Optional.
+  - "drafts/**"
+  - "**/*.env"
+  - ".github/**"

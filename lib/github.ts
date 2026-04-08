@@ -65,10 +65,9 @@ export interface TreeEntry {
   sha: string;
 }
 
-export const getFilteredTree = cache(async (): Promise<{ entries: TreeEntry[]; config: ParsedConfig }> => {
+export const getFilteredTree = cache(async (branch: string): Promise<{ entries: TreeEntry[]; config: ParsedConfig }> => {
   const config = await getConfig();
   const { owner, repo } = splitRepo(config.source.repo);
-  const branch = config.source.branch;
 
   const { data } = await octokit().git.getTree({
     owner,
@@ -105,7 +104,7 @@ export interface FileContent {
   } | null;
 }
 
-export async function getFileContent(filePath: string): Promise<FileContent> {
+export async function getFileContent(filePath: string, branch: string): Promise<FileContent> {
   const config = await getConfig();
   const { owner, repo } = splitRepo(config.source.repo);
 
@@ -113,7 +112,7 @@ export async function getFileContent(filePath: string): Promise<FileContent> {
     owner,
     repo,
     path: filePath,
-    ref: config.source.branch,
+    ref: branch,
   });
 
   if (Array.isArray(data) || data.type !== "file") {
@@ -127,7 +126,7 @@ export async function getFileContent(filePath: string): Promise<FileContent> {
       owner,
       repo,
       path: filePath,
-      sha: config.source.branch,
+      sha: branch,
       per_page: 1,
     });
     if (commits.data.length > 0) {
@@ -153,8 +152,8 @@ export async function getFileContent(filePath: string): Promise<FileContent> {
 }
 
 /** Returns raw binary Buffer for a file — used for downloads. */
-export async function getRawFileBuffer(filePath: string): Promise<{ buffer: Buffer; name: string }> {
-  const file = await getFileContent(filePath);
+export async function getRawFileBuffer(filePath: string, branch: string): Promise<{ buffer: Buffer; name: string }> {
+  const file = await getFileContent(filePath, branch);
   const buffer = Buffer.from(file.content, "base64");
   const name = filePath.split("/").pop() ?? filePath;
   return { buffer, name };

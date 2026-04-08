@@ -1,6 +1,14 @@
 import yaml from "js-yaml";
 import micromatch from "micromatch";
 
+export interface VaimoBranchConfig {
+  name: string;
+  passphrase: string;
+  comments?: {
+    enabled?: boolean;
+  };
+}
+
 export interface VaimoConfig {
   site: {
     title: string;
@@ -8,14 +16,11 @@ export interface VaimoConfig {
   };
   source: {
     repo: string;
-    branch?: string;
   };
   auth?: {
     sessionDurationDays?: number;
   };
-  comments?: {
-    enabled?: boolean;
-  };
+  branches: VaimoBranchConfig[];
   features?: {
     images?: boolean;
   };
@@ -23,18 +28,23 @@ export interface VaimoConfig {
   exclude?: string[];
 }
 
+export interface ParsedBranch {
+  name: string;
+  passphrase: string;
+  comments: { enabled: boolean };
+}
+
 export interface ParsedConfig {
   site: { title: string; description: string };
-  source: { repo: string; branch: string };
+  source: { repo: string };
   auth: { sessionDurationDays: number };
-  comments: { enabled: boolean };
+  branches: ParsedBranch[];
   features: { images: boolean };
   include: string[];
   exclude: string[];
 }
 
 const DEFAULT_SESSION_DAYS = 7;
-const DEFAULT_BRANCH = "main";
 
 export function parseConfig(raw: string): ParsedConfig {
   const parsed = yaml.load(raw) as VaimoConfig;
@@ -42,6 +52,7 @@ export function parseConfig(raw: string): ParsedConfig {
   if (!parsed?.site?.title) throw new Error("vaimopages.config: site.title is required");
   if (!parsed?.source?.repo) throw new Error("vaimopages.config: source.repo is required");
   if (!parsed?.include?.length) throw new Error("vaimopages.config: include list must not be empty");
+  if (!parsed?.branches?.length) throw new Error("vaimopages.config: branches list must not be empty");
 
   return {
     site: {
@@ -50,16 +61,19 @@ export function parseConfig(raw: string): ParsedConfig {
     },
     source: {
       repo: parsed.source.repo,
-      branch: parsed.source.branch ?? DEFAULT_BRANCH,
     },
     auth: {
       sessionDurationDays: parsed.auth?.sessionDurationDays ?? DEFAULT_SESSION_DAYS,
     },
-    comments: {
-      enabled: parsed.comments?.enabled !== false, // default true
-    },
+    branches: parsed.branches.map((b) => ({
+      name: b.name,
+      passphrase: b.passphrase,
+      comments: {
+        enabled: b.comments?.enabled ?? false,
+      },
+    })),
     features: {
-      images: parsed.features?.images !== false, // default true
+      images: parsed.features?.images !== false,
     },
     include: parsed.include,
     exclude: parsed.exclude ?? [],

@@ -33,20 +33,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "Ignored" }, { status: 200 });
   }
 
-  const body = JSON.parse(payload);
-  const ref: string = body.ref ?? "";
-
-  // Only react to pushes on master or main
-  const isMaster = ref === "master" || ref.endsWith("/master");
-  const isMain = ref === "main" || ref.endsWith("/main");
-  if (!isMaster && !isMain) {
-    return NextResponse.json({ message: "Not master/main branch, ignored" }, { status: 200 });
-  }
-
-  // Bust local config cache so next request reads fresh config
+  // Bust local config cache so the next request reads fresh config
   invalidateConfigCache();
 
-  // Trigger Vercel redeploy
+  // Trigger Vercel redeploy — content may have changed on any branch
   const deployHook = process.env.VERCEL_DEPLOY_HOOK_URL;
   if (deployHook) {
     try {

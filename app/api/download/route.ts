@@ -12,13 +12,13 @@ export async function GET(req: NextRequest) {
   if (!filePath) return NextResponse.json({ error: "path is required" }, { status: 400 });
 
   try {
-    const { entries } = await getFilteredTree();
+    const { entries } = await getFilteredTree(session.branchName);
     const allowed = new Set(entries.map((e) => e.path));
     if (!allowed.has(filePath)) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const { buffer, name } = await getRawFileBuffer(filePath);
+    const { buffer, name } = await getRawFileBuffer(filePath, session.branchName);
     const contentType = mime.getType(name) ?? "application/octet-stream";
 
     return new NextResponse(new Uint8Array(buffer), {

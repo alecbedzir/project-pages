@@ -1,4 +1,6 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { buildAuthOptions } from "@/lib/auth";
 import { getFilteredTree } from "@/lib/github";
 import Link from "next/link";
 
@@ -7,11 +9,14 @@ type Props = { params: Promise<{ path: string[] }> };
 const IMAGE_EXTS = new Set(["png", "jpg", "jpeg", "gif", "webp", "svg"]);
 
 export default async function GalleryPage({ params }: Props) {
+  const session = await getServerSession(await buildAuthOptions());
+  if (!session) redirect("/auth/signin");
+
   const { path: segments } = await params;
   const folderPath = segments.map(decodeURIComponent).join("/");
 
   // getFilteredTree is wrapped with React cache() — no extra network call vs layout
-  const { entries } = await getFilteredTree();
+  const { entries } = await getFilteredTree(session.branchName);
 
   const images = entries.filter((e) => {
     const dir = e.path.includes("/") ? e.path.slice(0, e.path.lastIndexOf("/")) : "";

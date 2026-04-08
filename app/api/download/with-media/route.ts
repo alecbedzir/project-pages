@@ -44,14 +44,14 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const { entries } = await getFilteredTree();
+    const { entries } = await getFilteredTree(session.branchName);
     const allowed = new Set(entries.map((e) => e.path));
 
     if (!allowed.has(filePath)) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const { buffer: mdBuffer, name: mdName } = await getRawFileBuffer(filePath);
+    const { buffer: mdBuffer, name: mdName } = await getRawFileBuffer(filePath, session.branchName);
     const rawMarkdown = mdBuffer.toString("utf-8");
 
     const imagePaths = extractImagePaths(rawMarkdown, filePath).filter((p) => allowed.has(p));
@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
     await Promise.all(
       imagePaths.map(async (imgPath) => {
         try {
-          const { buffer } = await getRawFileBuffer(imgPath);
+          const { buffer } = await getRawFileBuffer(imgPath, session.branchName);
           zip.file(imgPath, buffer);
         } catch {
           // skip images that fail to fetch

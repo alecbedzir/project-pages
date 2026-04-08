@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { buildAuthOptions } from "@/lib/auth";
 import { getFileContent, getFilteredTree } from "@/lib/github";
-import { filterPaths } from "@/lib/config";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(await buildAuthOptions());
@@ -13,13 +12,13 @@ export async function GET(req: NextRequest) {
 
   try {
     // Guard: verify the path is in the allowed set
-    const { entries, config } = await getFilteredTree();
+    const { entries } = await getFilteredTree(session.branchName);
     const allowed = new Set(entries.map((e) => e.path));
     if (!allowed.has(filePath)) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const file = await getFileContent(filePath);
+    const file = await getFileContent(filePath, session.branchName);
     return NextResponse.json(file);
   } catch (err) {
     console.error("content/file error:", err);

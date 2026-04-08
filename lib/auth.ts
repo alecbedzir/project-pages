@@ -22,6 +22,18 @@ export async function buildAuthOptions(): Promise<NextAuthOptions> {
       signIn: "/auth/signin",
       error: "/auth/error",
     },
+    callbacks: {
+      async jwt({ token, user }) {
+        if (user && "branchName" in user) {
+          token.branchName = user.branchName as string;
+        }
+        return token;
+      },
+      async session({ session, token }) {
+        session.branchName = (token.branchName as string) ?? "";
+        return session;
+      },
+    },
     providers: [
       CredentialsProvider({
         name: "Passphrase",
@@ -29,11 +41,26 @@ export async function buildAuthOptions(): Promise<NextAuthOptions> {
           passphrase: { label: "Passphrase", type: "password" },
         },
         async authorize(credentials) {
-          const expected = process.env.AUTH_PASSPHRASE;
-          if (!expected) throw new Error("AUTH_PASSPHRASE is not configured");
-          if (credentials?.passphrase !== expected) return null;
-          // Return a minimal user object — no real identity in passphrase mode
-          return { id: "team", name: "Vaimo Team", email: "team@vaimo.com" };
+          if (!credentials?.passphrase) return null;
+
+          let config;
+          try {
+            config = await getConfig();
+          } catch {
+            throw new Error("Unable to load configuration");
+          }
+
+          const branch = config.branches.find(
+            (b) => b.passphrase === credentials.passphrase
+          );
+          if (!branch) return null;
+
+          return {
+            id: branch.name,
+            name: "Vaimo Team",
+            email: "team@vaimo.com",
+            branchName: branch.name,
+          };
         },
       }),
     ],
