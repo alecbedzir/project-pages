@@ -83,16 +83,43 @@ The webhook tells this app whenever the docs repository is pushed so it can trig
 
 1. Go to the **docs repository** on GitHub.
 2. Navigate to **Settings → Webhooks → Add webhook**.
-3. Fill in:
+3. Fill in each field as follows:
 
-   | Field | Value |
-   |---|---|
-   | **Payload URL** | `https://<your-vercel-domain>/api/webhook/github` |
-   | **Content type** | `application/json` |
-   | **Secret** | Same value as `GITHUB_WEBHOOK_SECRET` |
-   | **Which events?** | Just the push event |
+#### Payload URL
 
-4. Click **Add webhook**. GitHub sends a ping — a green tick in delivery history confirms it worked.
+```
+https://<your-vercel-domain>/api/webhook/github
+```
+
+Replace `<your-vercel-domain>` with the actual URL of your Project Pages deployment on Vercel (e.g. `https://project-pages-chi.vercel.app`). You can find this in your Vercel project dashboard.
+
+#### Content type
+
+Change the dropdown from the default `application/x-www-form-urlencoded` to **`application/json`**. This is required — the webhook handler parses the body as JSON and will reject payloads in any other format.
+
+#### Secret
+
+Paste the value of `GITHUB_WEBHOOK_SECRET` from your Vercel environment variables. If you haven't created one yet, generate it now:
+
+```bash
+openssl rand -hex 32
+```
+
+Set that value in two places: here in the GitHub webhook form, and as `GITHUB_WEBHOOK_SECRET` in **Vercel → Project → Settings → Environment Variables**. They must match exactly. The app uses this to verify every incoming request is genuinely from GitHub.
+
+#### SSL verification
+
+Leave **Enable SSL verification** selected (the default). Do not disable it.
+
+#### Which events would you like to trigger this webhook?
+
+Select **Just the push event**. The app reacts to pushes on any branch of the docs repository — it invalidates the config cache and triggers a Vercel redeploy so content stays fresh.
+
+#### Active
+
+Leave the **Active** checkbox ticked.
+
+4. Click **Add webhook**. GitHub immediately sends a ping request — go to the webhook's **Recent Deliveries** tab and confirm there is a green tick. If you see a red cross, check that `GITHUB_WEBHOOK_SECRET` matches on both sides and that your Vercel deployment is live.
 
 ## Supabase Setup
 
