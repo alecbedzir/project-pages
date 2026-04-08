@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- A Vercel account connected to the `vaimo/vaimo-pages` GitHub repository.
+- A Vercel account connected to the `vaimo/project-pages` GitHub repository.
 - A Supabase project (free tier is sufficient).
 - A GitHub Personal Access Token with read access to the docs repository.
 
@@ -17,9 +17,9 @@ npm run dev
 
 ## Vercel Setup
 
-1. Connect the `vaimo/vaimo-pages` GitHub repo to a Vercel project.
+1. Connect the `vaimo/project-pages` GitHub repo to a Vercel project.
 2. Set all environment variables listed below under **Project → Settings → Environment Variables**.
-3. The app builds on every push to `master` of the Vaimo Pages repo.
+3. The app builds on every push to `master` of the Project Pages repo.
 4. It also builds when the docs repo receives a push (via the GitHub webhook → Vercel deploy hook).
 
 ## Environment Variables

@@ -4,7 +4,7 @@
 
 ```
 ┌─────────────────────────────────┐        ┌────────────────────────────┐
-│   Documentation Repository      │        │   Vaimo Pages (Next.js)    │
+│   Documentation Repository      │        │   Project Pages (Next.js)    │
 │   (private GitHub repo)         │        │   (separate GitHub repo)   │
 │                                 │        │                            │
 │   /docs/                        │  GitHub│   /app/                    │
@@ -38,13 +38,13 @@
 
 | Repository | Contents | Who owns it |
 |---|---|---|
-| `vaimo/vaimo-pages` | The Next.js application code | Vaimo Pages developers |
+| `vaimo/project-pages` | The Next.js application code | Project Pages developers |
 | `vaimo/<docs-repo>` | Documentation files and `projectpages.config` | Documentation team |
 
 The two repos are completely independent. The only coupling is:
 
-1. A GitHub personal access token in Vaimo Pages' Vercel env vars that grants read access to the docs repo.
-2. A GitHub webhook in the docs repo that points at the Vaimo Pages Vercel deploy hook URL.
+1. A GitHub personal access token in Project Pages' Vercel env vars that grants read access to the docs repo.
+2. A GitHub webhook in the docs repo that points at the Project Pages Vercel deploy hook URL.
 
 ## Branch-Based Content Model
 

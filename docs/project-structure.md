@@ -1,7 +1,7 @@
 # Project Structure
 
 ```
-vaimo-pages/
+project-pages/
 ├── app/
 │   ├── layout.tsx                     # Root layout: sidebar + top nav
 │   ├── page.tsx                       # Home / index page

@@ -3,7 +3,7 @@ import "./globals.css";
 import ClientLayout from "@/components/ClientLayout";
 
 export const metadata: Metadata = {
-  title: "Vaimo Pages",
+  title: "Project Pages",
   description: "Internal documentation viewer",
 };
 

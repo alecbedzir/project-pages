@@ -1,4 +1,4 @@
-# Vaimo Pages
+# Project Pages
 
 A Next.js portal that turns a private GitHub repository into a clean, branded documentation site. Content is fetched live via the GitHub API. Access is controlled by passphrases — each passphrase maps to a Git branch, so different audiences see different content from the same repository.
 
@@ -17,7 +17,7 @@ docs-repo (GitHub)
   ├── client            ← curated for the client
   └── projectpages.config ← declares branches, passphrases, file filters
 
-Vaimo Pages (Vercel)
+Project Pages (Vercel)
   └── reads config → authenticates → serves the right branch per session
       └── Supabase: per-branch inline comments (optional)
 ```
