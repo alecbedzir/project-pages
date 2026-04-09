@@ -2,6 +2,7 @@
 
 import { signOut } from "next-auth/react";
 import Image from "next/image";
+import BranchSwitcher from "./BranchSwitcher";
 
 interface TopNavProps {
   siteTitle: string;
@@ -68,6 +69,8 @@ export default function TopNav({ siteTitle, onMenuToggle }: TopNavProps) {
       >
         {siteTitle}
       </span>
+
+      <BranchSwitcher />
 
       <button
         onClick={() => signOut({ callbackUrl: "/auth/signin" })}

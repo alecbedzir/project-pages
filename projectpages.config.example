@@ -31,32 +31,58 @@ auth:
   sessionDurationDays: 7           # Optional. How long a login session lasts.
                                    # Default: 7. Set to 1 for short-lived access.
 
+# ── User groups ──────────────────────────────────────────────────────────────
+#
+# Defines the audiences that can access this portal. Each group has a name
+# and a passphrase. Users who enter the passphrase are authenticated as that
+# group and can access whichever branches are assigned to it.
+#
+# Rules:
+#   - At least one user group is required.
+#   - Each passphrase must be unique across all groups.
+#   - "passphrase" is stored in plain text here; treat this file like a secret.
+#
+userGroups:
+  - name: vaimo                         # Internal team
+    passphrase: "replace-with-secret"
+
+  - name: client                        # Client audience
+    passphrase: "replace-with-another-secret"
+
+  # Add more groups as needed:
+  # - name: external-partner
+  #   passphrase: "partner-secret"
+
 # ── Branches ─────────────────────────────────────────────────────────────────
 #
-# Each entry maps a Git branch to a passphrase. Users who enter the passphrase
-# are granted access to that branch's content exclusively. Multiple branches
-# can coexist in the same repo — e.g. one for internal use and one for clients.
+# Each entry maps a Git branch to one or more user groups. Users land on the
+# first branch in this list that their group can access. If their group has
+# access to multiple branches, a branch switcher appears in the top nav.
 #
 # Rules:
 #   - At least one branch is required.
 #   - "name" must match an existing Git branch in the source repo.
-#   - "passphrase" is stored in plain text here; treat this file like a secret.
-#   - "comments.enabled" controls inline comments for that audience (default: false).
+#   - "userGroups" lists which groups can access this branch (by name).
+#   - "comments.enabled" controls inline comments for this branch (default: false).
 #
 branches:
-  - name: master                        # Git branch name
-    passphrase: "replace-with-secret"   # Passphrase that unlocks this branch
+  - name: master                        # Full internal content
+    userGroups:
+      - vaimo
+      - client
     comments:
-      enabled: false                    # Optional. Default: false.
+      enabled: false
 
-  - name: client                        # Example: curated client-facing branch
-    passphrase: "replace-with-another-secret"
+  - name: client                        # Curated client-facing content
+    userGroups:
+      - client
     comments:
       enabled: false
 
   # Add more branches as needed:
   # - name: external-partner
-  #   passphrase: "partner-secret"
+  #   userGroups:
+  #     - external-partner
   #   comments:
   #     enabled: false
 
@@ -66,7 +92,6 @@ branches:
 # At least one pattern is required.
 #
 # "exclude" hides files that matched include. Optional.
-# Useful for hiding drafts or internal files in shared branches.
 #
 include:
   - "**/*.md"

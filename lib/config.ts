@@ -1,9 +1,14 @@
 import yaml from "js-yaml";
 import micromatch from "micromatch";
 
-export interface VaimoBranchConfig {
+export interface UserGroupConfig {
   name: string;
   passphrase: string;
+}
+
+export interface VaimoBranchConfig {
+  name: string;
+  userGroups: string[];
   comments?: {
     enabled?: boolean;
   };
@@ -17,6 +22,7 @@ export interface VaimoConfig {
   auth?: {
     sessionDurationDays?: number;
   };
+  userGroups: UserGroupConfig[];
   branches: VaimoBranchConfig[];
   features?: {
     images?: boolean;
@@ -25,15 +31,21 @@ export interface VaimoConfig {
   exclude?: string[];
 }
 
-export interface ParsedBranch {
+export interface ParsedUserGroup {
   name: string;
   passphrase: string;
+}
+
+export interface ParsedBranch {
+  name: string;
+  userGroups: string[];
   comments: { enabled: boolean };
 }
 
 export interface ParsedConfig {
   site: { title: string; description: string };
   auth: { sessionDurationDays: number };
+  userGroups: ParsedUserGroup[];
   branches: ParsedBranch[];
   features: { images: boolean };
   include: string[];
@@ -47,6 +59,7 @@ export function parseConfig(raw: string): ParsedConfig {
 
   if (!parsed?.site?.title) throw new Error("projectpages.config: site.title is required");
   if (!parsed?.include?.length) throw new Error("projectpages.config: include list must not be empty");
+  if (!parsed?.userGroups?.length) throw new Error("projectpages.config: userGroups list must not be empty");
   if (!parsed?.branches?.length) throw new Error("projectpages.config: branches list must not be empty");
 
   return {
@@ -57,9 +70,13 @@ export function parseConfig(raw: string): ParsedConfig {
     auth: {
       sessionDurationDays: parsed.auth?.sessionDurationDays ?? DEFAULT_SESSION_DAYS,
     },
+    userGroups: parsed.userGroups.map((g) => ({
+      name: g.name,
+      passphrase: g.passphrase,
+    })),
     branches: parsed.branches.map((b) => ({
       name: b.name,
-      passphrase: b.passphrase,
+      userGroups: b.userGroups ?? [],
       comments: {
         enabled: b.comments?.enabled ?? false,
       },
@@ -70,6 +87,13 @@ export function parseConfig(raw: string): ParsedConfig {
     include: parsed.include,
     exclude: parsed.exclude ?? [],
   };
+}
+
+/** Returns the names of all branches accessible to the given user group, in config order. */
+export function getAccessibleBranches(userGroupName: string, config: ParsedConfig): string[] {
+  return config.branches
+    .filter((b) => b.userGroups.includes(userGroupName))
+    .map((b) => b.name);
 }
 
 const IMAGE_EXTENSIONS = new Set(["png", "jpg", "jpeg", "gif", "webp", "svg"]);
