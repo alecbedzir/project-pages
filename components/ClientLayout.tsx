@@ -1,5 +1,6 @@
 "use client";
 
+import { SessionProvider } from "next-auth/react";
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 
 const STORAGE_KEY = "vaimo:commentPanelCollapsed";
@@ -33,8 +34,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   }, []);
 
   return (
-    <CommentPanelContext.Provider value={{ collapsed, setCollapsed }}>
-      {children}
-    </CommentPanelContext.Provider>
+    <SessionProvider>
+      <CommentPanelContext.Provider value={{ collapsed, setCollapsed }}>
+        {children}
+      </CommentPanelContext.Provider>
+    </SessionProvider>
   );
 }
