@@ -12,24 +12,11 @@ import {
 } from "@tanstack/react-table";
 
 interface CsvViewProps {
-  rawCsv: string;
+  headers: string[];
+  rows: Record<string, string>[];
 }
 
-function parseCsv(raw: string): { headers: string[]; rows: Record<string, string>[] } {
-  const lines = raw.trim().split("\n");
-  if (!lines.length) return { headers: [], rows: [] };
-
-  const headers = lines[0].split(",").map((h) => h.trim().replace(/^"|"$/g, ""));
-  const rows = lines.slice(1).map((line) => {
-    const values = line.split(",").map((v) => v.trim().replace(/^"|"$/g, ""));
-    return Object.fromEntries(headers.map((h, i) => [h, values[i] ?? ""]));
-  });
-
-  return { headers, rows };
-}
-
-export default function CsvView({ rawCsv }: CsvViewProps) {
-  const { headers, rows } = useMemo(() => parseCsv(rawCsv), [rawCsv]);
+export default function CsvView({ headers, rows }: CsvViewProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
 

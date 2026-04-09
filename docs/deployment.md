@@ -36,8 +36,6 @@ npm run dev
 | `SUPABASE_SERVICE_ROLE_KEY` | Yes | Supabase service role key (server-side only, never exposed to browser) |
 | `VERCEL_DEPLOY_HOOK_URL` | Yes | Vercel deploy hook URL, called when docs repo receives a push |
 
-> `AUTH_PASSPHRASE` is no longer used. Passphrases are defined in `projectpages.config` inside the docs repository.
-
 ---
 
 ### `DOCS_REPO`
@@ -96,7 +94,16 @@ openssl rand -base64 32
 
 ## GitHub Webhook Setup
 
-The webhook tells this app whenever the docs repository is pushed so it can trigger a rebuild.
+The webhook tells this app whenever the docs repository is pushed so it can trigger a rebuild. Setup has two parts: creating a deploy hook in Vercel, then registering a webhook on the GitHub content repository.
+
+### Part 1 — Create a Vercel deploy hook
+
+1. Go to your Vercel project → **Settings → Git → Deploy Hooks**.
+2. Enter a name (e.g. `github-content-push`) and set the branch to `master`.
+3. Click **Create Hook** and copy the generated URL.
+4. Add it as `VERCEL_DEPLOY_HOOK_URL` in **Vercel → Project → Settings → Environment Variables**.
+
+### Part 2 — Register the webhook on the content repository
 
 1. Go to the **docs repository** on GitHub.
 2. Navigate to **Settings → Webhooks → Add webhook**.

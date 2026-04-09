@@ -4,6 +4,7 @@ import { buildAuthOptions } from "@/lib/auth";
 import { getFilteredTree, getFileContent } from "@/lib/github";
 import { renderMarkdown, extractHeadings } from "@/lib/markdown";
 import { convertDocxToHtml } from "@/lib/docx";
+import { parse as parseCsv } from "csv-parse/sync";
 import MarkdownView from "@/components/FileView/MarkdownView";
 import CsvView from "@/components/FileView/CsvView";
 import ImageView from "@/components/FileView/ImageView";
@@ -50,8 +51,14 @@ export default async function ViewPage({ params }: Props) {
     const headings = extractHeadings(html);
     content = <MarkdownView html={html} filePath={filePath} commentsEnabled={commentsEnabled} headings={headings} />;
   } else if (ext === "csv") {
-    const raw = rawBuffer.toString("utf-8");
-    content = <CsvView rawCsv={raw} />;
+    const rows: Record<string, string>[] = parseCsv(rawBuffer.toString("utf-8"), {
+      columns: true,
+      skip_empty_lines: true,
+      bom: true,
+      trim: true,
+    });
+    const headers = rows.length > 0 ? Object.keys(rows[0]) : [];
+    content = <CsvView headers={headers} rows={rows} />;
   } else if (DOCX_EXTS.has(ext)) {
     const html = await convertDocxToHtml(rawBuffer);
     content = <MarkdownView html={html} filePath={filePath} commentsEnabled={commentsEnabled} />;
