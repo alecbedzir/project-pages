@@ -7,8 +7,9 @@
 #
 #   1. Copy this file to the ROOT of your knowledge-base repository.
 #   2. Rename it to exactly:  projectpages.config   (no file extension)
-#   3. The file must be present in EVERY Git branch of that repository
-#      that Project Pages should serve content from.
+#   3. The file only needs to exist in ONE branch of that repository
+#      (the branch(es) listed in CONFIG_BRANCH — default: master, main).
+#      Other content branches do not need a copy of this file.
 #
 # ── File location ───────────────────────────────────────────────────────────
 #

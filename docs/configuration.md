@@ -1,6 +1,6 @@
 # `projectpages.config` Reference
 
-This YAML file must exist at the root of your documentation repository. It must be present in **every Git branch** that Project Pages serves. The app reads it on every request (with a 60-second in-memory cache), always from the repository's default branch.
+This YAML file must exist at the root of your documentation repository in the branch(es) configured by `CONFIG_BRANCH` (default: `master,main`). It does **not** need to be present in every content branch — the app reads it from a single designated branch on every request (with a 60-second in-memory cache).
 
 The repository itself is identified by the `DOCS_REPO` environment variable set in the Project Pages deployment — **not** by anything inside this config file. See [Deployment → DOCS_REPO](./deployment.md#docs_repo) for details.
 

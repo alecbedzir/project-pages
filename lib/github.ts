@@ -39,21 +39,30 @@ export async function getConfig(): Promise<ParsedConfig> {
 
   const { owner, repo } = getDocsRepo();
 
-  const { data } = await octokit().repos.getContent({
-    owner,
-    repo,
-    path: "projectpages.config",
-  });
+  const configBranchEnv = process.env.CONFIG_BRANCH ?? "master,main";
+  const branches = configBranchEnv.split(",").map((b) => b.trim()).filter(Boolean);
 
-  if (Array.isArray(data) || data.type !== "file") {
-    throw new Error("projectpages.config not found or is not a file");
+  let lastError: unknown;
+  for (const branch of branches) {
+    try {
+      const { data } = await octokit().repos.getContent({
+        owner,
+        repo,
+        path: "projectpages.config",
+        ref: branch,
+      });
+
+      if (Array.isArray(data) || data.type !== "file") continue;
+
+      const config = parseConfig(Buffer.from(data.content, "base64").toString("utf-8"));
+      _configCache = { config, fetchedAt: now };
+      return config;
+    } catch (err) {
+      lastError = err;
+    }
   }
 
-  const raw = Buffer.from(data.content, "base64").toString("utf-8");
-  const config = parseConfig(raw);
-
-  _configCache = { config, fetchedAt: now };
-  return config;
+  throw lastError ?? new Error("projectpages.config not found in any configured branch");
 }
 
 /** Invalidate the in-memory config cache (called by the webhook handler). */

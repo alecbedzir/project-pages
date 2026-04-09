@@ -34,7 +34,7 @@ export default function ConfigError() {
           The application could not reach the content repository. This is usually a configuration
           issue — check the server logs for details.
         </p>
-        <p style={{ margin: 0, color: "var(--color-grey-500)", fontSize: "0.875rem" }}>
+        <p style={{ margin: "0 0 0.5rem", color: "var(--color-grey-500)", fontSize: "0.875rem" }}>
           Make sure <code style={{ fontSize: "0.875em" }}>DOCS_REPO</code> is set in the environment
           and that a valid{" "}
           <code
@@ -47,7 +47,24 @@ export default function ConfigError() {
           >
             projectpages.config
           </code>{" "}
-          file exists at the root of that repository.
+          file exists in the branch(es) specified by{" "}
+          <code style={{ fontSize: "0.875em" }}>CONFIG_BRANCH</code>{" "}
+          (default: <code style={{ fontSize: "0.875em" }}>master,main</code>).
+        </p>
+        <p style={{ margin: 0, color: "var(--color-grey-500)", fontSize: "0.875rem" }}>
+          If the configuration loaded successfully, the active branch may not exist in the
+          repository — verify that every branch listed in{" "}
+          <code
+            style={{
+              background: "var(--color-grey-100)",
+              padding: "0.1em 0.35em",
+              borderRadius: "3px",
+              fontSize: "0.875em",
+            }}
+          >
+            projectpages.config
+          </code>{" "}
+          has been pushed to <code style={{ fontSize: "0.875em" }}>DOCS_REPO</code>.
         </p>
       </div>
     </div>

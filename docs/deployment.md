@@ -27,6 +27,7 @@ npm run dev
 | Variable | Required | Description |
 |---|---|---|
 | `DOCS_REPO` | Yes | `owner/repo` of the documentation repository (e.g. `vaimo/my-docs`). See below. |
+| `CONFIG_BRANCH` | No | Comma-separated branch names to try when fetching `projectpages.config`. Defaults to `master,main`. |
 | `GITHUB_TOKEN` | Yes | Personal access token with read access to `DOCS_REPO` |
 | `GITHUB_WEBHOOK_SECRET` | Yes | Secret shared with the GitHub webhook for signature validation |
 | `NEXTAUTH_SECRET` | Yes | Random string for NextAuth JWT signing. Rotate to invalidate all sessions. |
@@ -49,13 +50,29 @@ DOCS_REPO=vaimo/my-docs-repo
 
 The value must be in `owner/repo` format. It controls three things:
 
-1. **Where `projectpages.config` is read from** — the app fetches `projectpages.config` from this repository's default branch on every request (cached for 60 seconds).
+1. **Where `projectpages.config` is read from** — the app fetches `projectpages.config` from the branch(es) listed in `CONFIG_BRANCH` (default: `master,main`), on every request (cached for 60 seconds).
 2. **Where all file content is fetched from** — every file tree request, file view, image, and download is served from this repository, on the branch that matches the user's passphrase.
 3. **What the `GITHUB_TOKEN` needs access to** — the token must have Contents: Read-only access to this exact repository.
 
 If `DOCS_REPO` is not set when the app starts, all content requests will fail immediately. The app will render an error page and log a clear message to the server console. There is nothing inside `projectpages.config` that can override or substitute this value.
 
 **One deployment = one repository.** If you need to serve a different knowledge-base repository, deploy a separate instance of the app with a different `DOCS_REPO` value.
+
+---
+
+### `CONFIG_BRANCH`
+
+Comma-separated list of branch names the app will try, in order, when loading `projectpages.config` from the docs repository:
+
+```
+CONFIG_BRANCH=master,main
+```
+
+The app tries each branch left to right and uses the first one that returns the file successfully. If none of the listed branches contain the file, the app renders an error page.
+
+**Default value:** `master,main` — covers both common default-branch naming conventions without any configuration needed.
+
+**Why this matters:** `projectpages.config` only needs to live in one branch. All content branches (`release-docs`, feature branches, etc.) are served using the config fetched from whichever branch succeeds first here.
 
 ---
 
@@ -156,6 +173,7 @@ Next.js 15 requires any component calling `useSearchParams()` to be a child of `
 
 - Check server logs for a `[projectpages]` prefixed message — it will say exactly what is wrong.
 - Most commonly: `DOCS_REPO` is not set, is set to an invalid format, or `GITHUB_TOKEN` lacks access.
+- If the docs repo uses a non-standard default branch, set `CONFIG_BRANCH` to that branch name.
 
 ### GitHub API returns 401 or 404
 
