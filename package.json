@@ -12,6 +12,7 @@
     "@octokit/rest": "^21.1.1",
     "@supabase/supabase-js": "^2.49.2",
     "@tanstack/react-table": "^8.21.3",
+    "@vercel/analytics": "^2.0.1",
     "csv-parse": "^6.2.1",
     "gray-matter": "^4.0.3",
     "js-yaml": "^4.1.0",
