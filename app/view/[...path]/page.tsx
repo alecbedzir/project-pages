@@ -68,7 +68,7 @@ export default async function ViewPage({ params }: Props) {
   } else if (IMAGE_EXTS.has(ext)) {
     content = (
       <ImageView
-        src={`/api/download?path=${encodeURIComponent(filePath)}`}
+        src={`/api/raw?path=${encodeURIComponent(filePath)}`}
         alt={fileName}
       />
     );

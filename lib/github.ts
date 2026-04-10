@@ -132,6 +132,13 @@ export async function getFileContent(filePath: string, branch: string): Promise<
     throw new Error(`${filePath} is not a file`);
   }
 
+  // For files >1MB, repos.getContent returns empty content — fall back to the blob API
+  let content = data.content;
+  if (!content || (data as { encoding?: string }).encoding === "none") {
+    const blob = await octokit().git.getBlob({ owner, repo, file_sha: data.sha });
+    content = blob.data.content;
+  }
+
   // Fetch the most recent commit that touched this file
   let lastCommit: FileContent["lastCommit"] = null;
   try {
@@ -156,7 +163,7 @@ export async function getFileContent(filePath: string, branch: string): Promise<
 
   return {
     path: data.path,
-    content: data.content,
+    content,
     encoding: "base64",
     size: data.size,
     sha: data.sha,
