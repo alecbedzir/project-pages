@@ -1,5 +1,15 @@
 # Deployment
 
+## How auto-updates work
+
+When someone pushes to the docs repository, the site automatically rebuilds:
+
+1. GitHub sends a `push` webhook to `/api/webhook/github` on this app.
+2. The handler verifies the request signature using `GITHUB_WEBHOOK_SECRET`.
+3. It POSTs to `VERCEL_DEPLOY_HOOK_URL`, triggering a fresh Vercel deployment.
+
+This means two things must be correctly configured for auto-updates to work: the GitHub webhook on the docs repository (pointing at this app's URL with the right secret), and the Vercel deploy hook URL stored as an environment variable. Both are covered in the [GitHub Webhook Setup](#github-webhook-setup) section below.
+
 ## Prerequisites
 
 - A Vercel account connected to the `vaimo/project-pages` GitHub repository.
@@ -99,7 +109,7 @@ The webhook tells this app whenever the docs repository is pushed so it can trig
 ### Part 1 — Create a Vercel deploy hook
 
 1. Go to your Vercel project → **Settings → Git → Deploy Hooks**.
-2. Enter a name (e.g. `github-content-push`) and set the branch to `master`.
+2. Enter a name (e.g. `github-content-push`) and set the branch to whatever the default branch of your Project Pages repo is (`main` or `master`).
 3. Click **Create Hook** and copy the generated URL.
 4. Add it as `VERCEL_DEPLOY_HOOK_URL` in **Vercel → Project → Settings → Environment Variables**.
 
