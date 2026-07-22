@@ -4,6 +4,7 @@ import { buildAuthOptions } from "@/lib/auth";
 import { getConfig, getFilteredTree, getRawFileBuffer } from "@/lib/github";
 import { getComments } from "@/lib/supabase";
 import { buildAnnotatedMarkdown } from "@/lib/markdown";
+import { attachmentHeader } from "@/lib/contentDisposition";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(await buildAuthOptions());
@@ -39,7 +40,7 @@ export async function GET(req: NextRequest) {
       return new NextResponse(annotated, {
         headers: {
           "Content-Type": "text/markdown; charset=utf-8",
-          "Content-Disposition": `attachment; filename="${outputName}"`,
+          "Content-Disposition": attachmentHeader(outputName),
         },
       });
     }
@@ -57,7 +58,7 @@ export async function GET(req: NextRequest) {
     return new NextResponse(combined, {
       headers: {
         "Content-Type": "text/markdown; charset=utf-8",
-        "Content-Disposition": `attachment; filename="${commentFile}"`,
+        "Content-Disposition": attachmentHeader(commentFile),
       },
     });
   } catch (err) {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { buildAuthOptions } from "@/lib/auth";
 import { getFilteredTree, getRawFileBuffer } from "@/lib/github";
+import { attachmentHeader } from "@/lib/contentDisposition";
 import JSZip from "jszip";
 import path from "path";
 
@@ -77,7 +78,7 @@ export async function GET(req: NextRequest) {
     return new NextResponse(zipBuffer as unknown as BodyInit, {
       headers: {
         "Content-Type": "application/zip",
-        "Content-Disposition": `attachment; filename="${zipName}"`,
+        "Content-Disposition": attachmentHeader(zipName),
       },
     });
   } catch (err) {

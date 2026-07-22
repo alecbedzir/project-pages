@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { buildAuthOptions } from "@/lib/auth";
 import { getFilteredTree, getRawFileBuffer } from "@/lib/github";
+import { attachmentHeader } from "@/lib/contentDisposition";
 import mime from "mime";
 
 export async function GET(req: NextRequest) {
@@ -24,7 +25,7 @@ export async function GET(req: NextRequest) {
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         "Content-Type": contentType,
-        "Content-Disposition": `attachment; filename="${name}"`,
+        "Content-Disposition": attachmentHeader(name),
         "Content-Length": buffer.byteLength.toString(),
       },
     });

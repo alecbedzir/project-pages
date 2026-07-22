@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { buildAuthOptions } from "@/lib/auth";
+import { attachmentHeader } from "@/lib/contentDisposition";
 import {
   getFilteredTree,
   getDocsRepoName,
@@ -60,7 +61,7 @@ export async function GET() {
     return new NextResponse(zipBuffer as unknown as BodyInit, {
       headers: {
         "Content-Type": "application/zip",
-        "Content-Disposition": `attachment; filename="${zipName}"`,
+        "Content-Disposition": attachmentHeader(zipName),
         "Content-Length": zipBuffer.byteLength.toString(),
         // Small private cache so a quick re-click is instant, without serving
         // stale content across pushes (a push redeploys and busts this anyway).
