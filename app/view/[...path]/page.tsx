@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { buildAuthOptions } from "@/lib/auth";
 import { getFilteredTree, getFileContent } from "@/lib/github";
@@ -32,7 +32,34 @@ export default async function ViewPage({ params }: Props) {
   const { entries, config } = await getFilteredTree(session.branchName);
 
   const entry = entries.find((e) => e.path === filePath);
-  if (!entry) notFound();
+  // The file isn't in the current branch (e.g. the user switched branches while
+  // viewing a file that only exists in another one). Render a friendly message
+  // in the content area instead of Next's global 404, so the top + side nav stay
+  // and the user can keep working.
+  if (!entry) {
+    return (
+      <main style={{ flex: 1, padding: "1.5rem 2rem", overflowY: "auto", minWidth: 0 }}>
+        <div
+          style={{
+            maxWidth: "460px",
+            margin: "5rem auto 0",
+            background: "var(--color-grey-100)",
+            border: "1px solid var(--color-grey-300)",
+            borderRadius: "8px",
+            padding: "1.75rem",
+            textAlign: "center",
+          }}
+        >
+          <p style={{ margin: "0 0 0.5rem", fontSize: "1.0625rem", fontWeight: 600, color: "var(--color-grey-900)" }}>
+            A page you&rsquo;re trying to reach doesn&rsquo;t exist in the current branch.
+          </p>
+          <p style={{ margin: 0, color: "var(--color-grey-700)", fontSize: "0.9375rem" }}>
+            Pick a file from the navigation on the left to continue.
+          </p>
+        </div>
+      </main>
+    );
+  }
 
   const file = await getFileContent(filePath, session.branchName);
   const ext = filePath.split(".").pop()?.toLowerCase() ?? "";
